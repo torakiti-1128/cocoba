@@ -22,57 +22,82 @@ Cocobaは、AIによる排泄検知、おやつによるここちゃんの誘導
 
 ---
 
-## システムアーキテクチャ
+## 技術スタック
 
-### 構成図（作成中）
+### 構成図
 ```mermaid
 graph TB
-    subgraph "自宅 (Edge Environment)"
-        Camera[ネットワークカメラ] -- "映像ストリーム (RTSP)" --> EdgePC[エッジPC: 推論・ハード制御]
-        EdgePC -- "誘導指示 (ローカルMQTT)" --> ESP32_A[ESP32: おやつシューター]
-        EdgePC -- "移動指示 (ローカルMQTT)" --> ESP32_B[ESP32: ルンバ]
-        EdgePC -- "シールド指示 (ローカルMQTT)" --> ESP32_C[ESP32: シールドロボット]
+    subgraph "自宅 (ローカル環境)"
+        Camera[ネットワークカメラ]
+        
+        subgraph "エッジPC"
+            Logic[AWS連携・AI推論・デバイス制御: Python]
+            LocalBroker[ローカルブローカー: Mosquitto]
+        end
+        
+        ESP32_A[ESP32: Cocobaロボット群]
     end
 
     subgraph "Amazon Web Service"
-        IoTCore[AWS IoT Core]
-        AppRunner[AWS App Runner: FastAPI]
-        RDS[(Amazon RDS: PostgreSQL)]
-        TrainJob[AWS SageMaker / ECS: 学習バッチジョブ]
+        IoTCore[AWS IoT Core: コマンド中継]
+        APIGW[API Gateway: ルーティング]
+        Lambda[AWS Lambda: バックエンドロジック]
+        Database[(Amazon DynamoDB: データベース)]
         subgraph "Amazon S3"
-            S3_Img[Images: スナップショット画像]
-            S3_Model[Models: 学習済みAIモデル]
+            S3_Model[Models: AIモデル]
+            S3_Img[Images: スナップショット]
         end
     end
 
-    subgraph "スマホ／PC"
-        WebUI[Web UI: Next.js PWA / Amplify]
+    subgraph "ユーザー"
+        terminal[スマートフォン・PC]
+    end
+
+    subgraph "Web (Vercel)"
+        WebUI[Web UI: Next.js PWA]
+    end
+
+    subgraph "開発環境"    
+        DevPC[開発者PC: ローカル学習]
     end
 
     subgraph "外部連携"
-        LINE[LINE Messaging API]
+        Line[LINE Messaging API]
     end
 
-    %% 通信経路 (遠隔操作と状態同期)
-    WebUI -- "遠隔操作/緊急停止 (MQTT over WS)" --> IoTCore
-    IoTCore -- "コマンド送信・更新通知 (MQTT over TLS)" ---> EdgePC
-    EdgePC -- "状態同期・ログ・メトリクス (HTTPS)" --> AppRunner
-    WebUI -- "ログ閲覧・設定 (HTTPS)" --> AppRunner
-    AppRunner -- "データ保存" --> RDS
-    AppRunner -- "プッシュ通知 (HTTPS)" --> LINE
+    %% ユーザー操作
+    terminal -- "操作" --> WebUI
 
-    %% S3直接通信 (Presigned URLパターン)
-    AppRunner -. "署名付きURL発行" .-> EdgePC
-    EdgePC -- "画像UP (S3直接通信)" --> S3_Img
-    EdgePC -- "新モデルDL (S3直接通信)" --> S3_Model
+    %% エッジ内部連携
+    Camera -- "映像 (RTSP)" --> Logic
+    Logic -- "制御コマンド Publish" --> LocalBroker
+    LocalBroker -- "コマンド Subscribe" --> ESP32_A
+    ESP32_A -- "メトリクス/状態 Publish" --> LocalBroker
+    LocalBroker -- "状態 Subscribe" --> Logic
 
-    %% 学習サイクル (非同期)
-    AppRunner -- "学習ジョブ非同期キック" --> TrainJob
-    S3_Img -- "学習データ読込" --> TrainJob
-    TrainJob -- "学習済みモデル出力" --> S3_Model
-    TrainJob -- "モデル更新をIoT Coreへ通知" --> IoTCore
+    %% エッジPCとAWS連携
+    Logic -- "メトリクス・ログ・温度送信 (HTTPS)" --> APIGW
+    Logic -- "署名付きURLの要求 (HTTPS)" --> APIGW
+    Logic -- "最新画像UP (HTTPS)" --> S3_Img
+    Logic -- "新モデルDL (HTTPS)" --> S3_Model
+    APIGW -. "署名付きURLを返却 (HTTPS)" .-> Logic
+    IoTCore -- "遠隔操作・DL通知・設定反映"--> Logic
+
+    %% AWS内部連携
+    APIGW -- "処理委譲" --> Lambda
+    Lambda -- "データ読み書き (HTTPS)" --> Database
+    WebUI -- "データ閲覧・設定変更 (HTTPS)" --> APIGW
+    Lambda -- "設定変更の反映 (MQTT over TLS)" --> IoTCore
+
+    %% WEBと外部連携
+    WebUI -- "遠隔操作 (MQTT over WS)" --> IoTCore
+    Lambda -- "PUSH通知 (HTTPS) " --> Line
+
+    %% 開発パイプライン (Local Training)
+    DevPC -- "学習元データ取得 (HTTPS)" --> S3_Img
+    DevPC -- "新モデルUP (HTTPS)" --> S3_Model
+    DevPC -- "モデル更新通知 (MQTT over TLS)" --> IoTCore
 ```
-※遠隔操作コマンド：緊急停止（キルスイッチ）、手動介入など
 
 ### 1. エッジ・推論レイヤー (Intel N100 / Python)
 *   **役割:** YOLOv8を用いた物体検知、ロボットへの座標計算・移動指示。
@@ -84,9 +109,10 @@ graph TB
 *   **技術:** C++17 (PlatformIO/Arduino), FreeRTOS (デュアルコア活用), MQTT
 *   **安全性:** ネットワーク切断時や障害物接近時の自動停止機能を搭載。
 
-### 3. クラウド・監視レイヤー (Next.js / FastAPI)
-*   **役割:** 外出先からのステータス確認、検知時の通知、緊急停止（キルスイッチ）。
-*   **技術:** AWS, Next.js, TypeScript, FastAPI, Tailwind CSS, MQTT, LINE Messaging API
+### 3. クラウド・監視レイヤー (Next.js / AWS Lambda)
+*   **役割:** 外出先からのステータス確認、検知時のスナップショット閲覧、緊急停止（キルスイッチ）。
+*   **技術:** Vercel (Next.js 14), AWS Lambda (Python), Amazon API Gateway, Amazon DynamoDB, AWS IoT Core (MQTT), LINE Messaging API。
+*   **特性:** サーバーレス構成による低コスト運用と、MQTT over WebSocket による低レイテンシな緊急停止コマンドの送信。
 
 ---
 
@@ -96,14 +122,14 @@ graph TB
 ├── data/                  # AI学習用データセット（画像・アノテーション）
 ├── docs/                  # 要件定義・設計・開発ルール等の仕様書一式
 ├── hardware/              # 3Dモデル(.stl), 回路図, 部品表(BOM)
-├── infrastructure/        # docker-compose (Backend/MQTT)
-├── models/                # 学習済みAIモデル (.onnx, OpenVINO IR)
-├── scripts/               # 汎用スクリプト (ISSUE追加、セットアップ)
+├── infrastructure/        # Terraform/CloudFormation (AWSリソース定義)
+├── models/                # 学習済みAIモデル (.onnx)
+├── scripts/               # 汎用スクリプト (Issue追加、セットアップ)
 └── src/
-    ├── inference/         # エッジAI推論エンジン (Python)
+    ├── inference/         # エッジAI推論・制御ロジック (Python)
     ├── firmware/          # ESP32ファームウェア (C++)
-    ├── backend/           # 状態同期・通信ブローカー (Python/FastAPI)
-    └── frontend/          # 遠隔監視ダッシュボード (Next.js/TypeScript)
+    ├── backend/           # AWS Lambda バックエンド関数 (Python)
+    └── frontend/          # Vercel 遠隔監視ダッシュボード (Next.js/TypeScript)
 ```
 
 ---
