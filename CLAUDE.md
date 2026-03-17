@@ -45,17 +45,3 @@ git branch
 * **直近の進捗:** [ログから読み取ったサマリー]
 * **提案する次のアクション (Next Issue):** [次に取り組むべきIssue番号と、その実装方針]
 ---
-
-## 開発時に使うコマンド・スクリプト
-あなたが自律的にタスクを進める際、またはテストを実行する際に参照すべき基本コマンド群です。
-
-* **エッジAI (Python):**
-  * Lint/Format: `ruff check src/inference/` / `black src/inference/`
-  * Type Check: `mypy --strict src/inference/`
-  * Test: `pytest src/inference/tests/`
-* **ファームウェア (ESP32/C++):**
-  * Build: `pio run -d src/firmware/`
-  * Lint: `clang-format -i src/firmware/src/*.cpp`
-* **UI (Next.js):**
-  * Lint: `npm run lint --prefix src/ui/`
-  * Type Check: `npm run tsc --prefix src/ui/`
