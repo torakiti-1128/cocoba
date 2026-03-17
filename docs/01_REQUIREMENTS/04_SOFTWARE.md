@@ -4,7 +4,7 @@
 環境構築の再現性と安定性を担保する。
 
 * **エッジOS:** Ubuntu Linux (22.04 LTS または 24.04 LTS) 
-* **言語 (エッジ):** Python 3.10+ (Docker` コンテナ上で稼働)
+* **言語 (エッジ):** Python 3.11+ (Docker` コンテナ上で稼働)
 * **言語 (デバイス):** C++ (Arduino Framework / ESP32向け)
 * **Webシステム (クラウド):** * バックエンド: Python (FastAPI)
   * データベース: 軽量なドキュメントDB
