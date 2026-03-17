@@ -47,8 +47,9 @@ Cocobaは、AIによる排泄検知、おやつによるここちゃんの誘導
 ├── data/                  # AI学習用データセット（画像・アノテーション）
 ├── docs/                  # 要件定義・設計・開発ルール等の仕様書一式
 ├── hardware/              # 3Dモデル(.stl), 回路図, 部品表(BOM)
-├── infra/                 # Dockerfile, docker-compose (Backend/MQTT)
+├── infrastructure/        # docker-compose (Backend/MQTT)
 ├── models/                # 学習済みAIモデル (.onnx, OpenVINO IR)
+├── scripts/               # 汎用スクリプト (ISSUE追加、セットアップ)
 └── src/
     ├── inference/         # エッジAI推論エンジン (Python)
     ├── firmware/          # ESP32ファームウェア (C++)

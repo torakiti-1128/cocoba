@@ -25,8 +25,9 @@
 ├── data/                  # [学習] YOLO追加学習用の生画像・アノテーションデータ
 ├── docs/                  # [仕様書] 要件・設計・ルール
 ├── hardware/              # [物理] 3Dモデル(.stl), 回路図, 部品表(BOM)
-├── infra/                 # [基盤] Dockerfile, docker-compose.yml
+├── infrastructure/        # [基盤] docker-compose.yml
 ├── models/                # [推論] 学習済みAIモデル群 (.pt, .onnx, OpenVINO IR等)
+├── scripts/               # [構築] 汎用スクリプト群 (ISSUE追加、セットアップ)
 ├── src/                   # [実装] システムソースコード群
 │   ├── inference/         # └─ 1. 推論エンジン・カメラ制御 (Python/ONNX)
 │   ├── firmware/          # └─ 2. ESP32ハードウェア制御 (C++/PlatformIO)
@@ -35,6 +36,7 @@
 ├── .gitignore             # [Git] データセットやコンパイル成果物等の除外設定
 ├── CLAUDE.md              # [AI] AIエージェント起動シーケンス
 └── README.md              # [説明] プロジェクトの説明とセットアップ手順
+
 ```
 
 ### 【ディレクトリ構成における厳守事項】
