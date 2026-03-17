@@ -23,7 +23,56 @@ Cocobaは、AIによる排泄検知、おやつによるここちゃんの誘導
 ---
 
 ## システムアーキテクチャ
-本システムは、安全性とリアルタイム性を担保するため、以下の3つのレイヤーで構成されています。
+
+### 構成図（作成中）
+```mermaid
+graph TB
+    subgraph "自宅 (Edge Environment)"
+        Camera[ネットワークカメラ] -- "映像ストリーム (RTSP)" --> EdgePC[エッジPC: 推論・ハード制御]
+        EdgePC -- "誘導指示 (ローカルMQTT)" --> ESP32_A[ESP32: おやつシューター]
+        EdgePC -- "移動指示 (ローカルMQTT)" --> ESP32_B[ESP32: ルンバ]
+        EdgePC -- "シールド指示 (ローカルMQTT)" --> ESP32_C[ESP32: シールドロボット]
+    end
+
+    subgraph "Amazon Web Service"
+        IoTCore[AWS IoT Core]
+        AppRunner[AWS App Runner: FastAPI]
+        RDS[(Amazon RDS: PostgreSQL)]
+        TrainJob[AWS SageMaker / ECS: 学習バッチジョブ]
+        subgraph "Amazon S3"
+            S3_Img[Images: スナップショット画像]
+            S3_Model[Models: 学習済みAIモデル]
+        end
+    end
+
+    subgraph "スマホ／PC"
+        WebUI[Web UI: Next.js PWA / Amplify]
+    end
+
+    subgraph "外部連携"
+        LINE[LINE Messaging API]
+    end
+
+    %% 通信経路 (遠隔操作と状態同期)
+    WebUI -- "遠隔操作/緊急停止 (MQTT over WS)" --> IoTCore
+    IoTCore -- "コマンド送信・更新通知 (MQTT over TLS)" ---> EdgePC
+    EdgePC -- "状態同期・ログ・メトリクス (HTTPS)" --> AppRunner
+    WebUI -- "ログ閲覧・設定 (HTTPS)" --> AppRunner
+    AppRunner -- "データ保存" --> RDS
+    AppRunner -- "プッシュ通知 (HTTPS)" --> LINE
+
+    %% S3直接通信 (Presigned URLパターン)
+    AppRunner -. "署名付きURL発行" .-> EdgePC
+    EdgePC -- "画像UP (S3直接通信)" --> S3_Img
+    EdgePC -- "新モデルDL (S3直接通信)" --> S3_Model
+
+    %% 学習サイクル (非同期)
+    AppRunner -- "学習ジョブ非同期キック" --> TrainJob
+    S3_Img -- "学習データ読込" --> TrainJob
+    TrainJob -- "学習済みモデル出力" --> S3_Model
+    TrainJob -- "モデル更新をIoT Coreへ通知" --> IoTCore
+```
+※遠隔操作コマンド：緊急停止（キルスイッチ）、手動介入など
 
 ### 1. エッジ・推論レイヤー (Intel N100 / Python)
 *   **役割:** YOLOv8を用いた物体検知、ロボットへの座標計算・移動指示。
