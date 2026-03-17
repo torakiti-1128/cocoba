@@ -3,121 +3,161 @@
 ## 1. 基本方針：エッジ自律と低レイテンシの担保
 本システムは、14歳のシニア犬（ここちゃん）の安全を最優先するため、以下の設計思想を貫く。
 
-*   **エッジ自律稼働 (Local-First):** インターネット接続が途絶した場合でも、エッジPCとデバイス間の通信のみで「検知〜誘導〜投下」のコア機能を完結させる。
+*   **エッジ自律稼働 (Local-First):** インターネット接続が途絶した場合でも、エッジPC内の「Local Broker」とデバイス間の通信のみで「検知〜誘導〜投下」のコア機能を完結させる。
 *   **低レイテンシ推論:** カメラ映像のAI推論を現場（エッジPC）で完結させ、通信遅延による接触事故を構造的に排除する。
-*   **フルマネージド・クラウド:** クラウド側は運用負荷を下げるため、AWSのサーバーレス/マネージドサービスを積極的に採用する。
+*   **サーバーレス・外部プラットフォーム活用:** クラウド側は運用負荷を最小化するため、AWS LambdaとVercelを組み合わせたハイブリッド構成を採用する。
 
 ---
 
-## 2. 技術スタック選定まとめ
+## 2. 技術スタック選定
 
 | レイヤー | コンポーネント | 技術・サービス | 選定理由 |
 | :--- | :--- | :--- | :--- |
-| **Edge AI** | 推論エンジン | Python 3.11, YOLOv8n, ONNX Runtime | N100でのCPU負荷抑制と、高い検知精度の両立 |
-| **Physical** | 制御マイコン | ESP32 (C++17, Arduino FW) | デュアルコアによる通信と制御の完全分離(FreeRTOS) |
-| **Backend** | APIサーバー | **AWS App Runner** (FastAPI) | コンテナの運用負荷を最小化し、高速なAPIを提供 |
-| | メッセージ基盤 | **AWS IoT Core** (MQTT) | 数千万デバイスを支える高信頼な双方向通信基盤 |
-| | データベース | **Amazon RDS (PostgreSQL)** | 構造化データとログの確実な永続化（SQLiteは不採用） |
-| | ストレージ | **Amazon S3 (Grouped)** | 画像資産（Images）とAIモデル（Models）の統合管理 |
-| **Training** | 学習プロセス | **AWS Lambda / SageMaker** | LambdaによるトリガーとSageMakerによる重学習の分離 |
-| **Frontend** | 遠隔監視UI | **AWS Amplify** (Next.js 14) | Next.jsの最新機能(App Router)と高速配信の両立 |
+| **ローカル** | ロジック・推論 | Python 3.11, YOLOv8n,  OpenCV,  ONNX Runtime | AWS連携・AI推論・デバイス制御を統合管理 |
+|  | デバイス制御中継 | Eclipse Mosquitto | クラウド遮断時もデバイス制御を継続するためのローカルブローカー |
+|  | 制御マイコン | ESP32 (C++17, Arduino FW) | デュアルコアによる通信と制御の完全分離(FreeRTOS) |
+| | 学習プロセス | Python 3.11, YOLOv8, OpenCV | ローカルのリソースを用いたモデル学習 |
+| **クラウド** | API エントリ | Amazon API Gateway | セキュアなエンドポイント提供とLambdaへのルーティング |
+| | バックエンド | AWS Lambda (Python) | イベント駆動による低コストかつスケーラブルな環境 |
+| | メッセージ基盤 | AWS IoT Core (MQTT) | 遠隔操作・DL通知・設定反映の中継点 |
+| | データベース | Amazon DynamoDB | 軽量かつ高速なサーバーレス・ドキュメントDB |
+| | ストレージ | Amazon S3 | スナップショット（Images）とAIモデル（Models）の管理 |
+| | 遠隔監視UI | Vercel (Next.js 14) | 高速なデプロイとNext.js(App Router)の配信 |
 
 ---
 
-## 3. システムアーキテクチャ図
+## 3. システムアーキテクチャ
 
-### 3.1. 全体システム構成図
-
+### 3-1. 構成図
 ```mermaid
 graph TB
-    subgraph "自宅 (Edge Environment)"
-        Camera[ネットワークカメラ] -- "映像ストリーム (RTSP)" --> EdgePC[エッジPC: 推論・ハード制御]
-        EdgePC -- "誘導指示 (ローカルMQTT)" --> ESP32_A[ESP32: おやつシューター]
-        EdgePC -- "移動指示 (ローカルMQTT)" --> ESP32_B[ESP32: ルンバ]
-        EdgePC -- "シールド指示 (ローカルMQTT)" --> ESP32_C[ESP32: シールドロボット]
+    subgraph "自宅 (ローカル環境)"
+        Camera[ネットワークカメラ]
+        
+        subgraph "エッジPC"
+            Logic[AWS連携・AI推論・デバイス制御: Python]
+            LocalBroker[ローカルブローカー: Mosquitto]
+        end
+        
+        ESP32_A[ESP32: Cocobaロボット群]
     end
 
     subgraph "Amazon Web Service"
-        IoTCore[AWS IoT Core]
-        AppRunner[AWS App Runner: FastAPI]
-        RDS[(Amazon RDS: PostgreSQL)]
-        TrainJob[AWS SageMaker / ECS: 学習バッチジョブ]
+        IoTCore[AWS IoT Core: コマンド中継]
+        APIGW[API Gateway: ルーティング]
+        Lambda[AWS Lambda: バックエンドロジック]
+        Database[(Amazon DynamoDB: データベース)]
         subgraph "Amazon S3"
-            S3_Img[Images: スナップショット画像]
-            S3_Model[Models: 学習済みAIモデル]
+            S3_Model[Models: AIモデル]
+            S3_Img[Images: スナップショット]
         end
     end
 
-    subgraph "スマホ／PC"
-        WebUI[Web UI: Next.js PWA / Amplify]
+    subgraph "ユーザー"
+        terminal[スマートフォン・PC]
+    end
+
+    subgraph "Web (Vercel)"
+        WebUI[Web UI: Next.js PWA]
+    end
+
+    subgraph "開発環境"    
+        DevPC[開発者PC: ローカル学習]
     end
 
     subgraph "外部連携"
-        LINE[LINE Messaging API]
+        Line[LINE Messaging API]
     end
 
-    %% 通信経路 (遠隔操作と状態同期)
-    WebUI -- "遠隔操作/緊急停止 (MQTT over WS)" --> IoTCore
-    IoTCore -- "コマンド送信・更新通知 (MQTT over TLS)" ---> EdgePC
-    EdgePC -- "状態同期・ログ・メトリクス (HTTPS)" --> AppRunner
-    WebUI -- "ログ閲覧・設定 (HTTPS)" --> AppRunner
-    AppRunner -- "データ保存" --> RDS
-    AppRunner -- "プッシュ通知 (HTTPS)" --> LINE
+    %% ユーザー操作
+    terminal -- "操作" --> WebUI
 
-    %% S3直接通信 (Presigned URLパターン)
-    AppRunner -. "署名付きURL発行" .-> EdgePC
-    EdgePC -- "画像UP (S3直接通信)" --> S3_Img
-    EdgePC -- "新モデルDL (S3直接通信)" --> S3_Model
+    %% エッジ内部連携
+    Camera -- "映像 (RTSP)" --> Logic
+    Logic -- "制御コマンド Publish" --> LocalBroker
+    LocalBroker -- "コマンド Subscribe" --> ESP32_A
+    ESP32_A -- "メトリクス/状態 Publish" --> LocalBroker
+    LocalBroker -- "状態 Subscribe" --> Logic
 
-    %% 学習サイクル (非同期)
-    AppRunner -- "学習ジョブ非同期キック" --> TrainJob
-    S3_Img -- "学習データ読込" --> TrainJob
-    TrainJob -- "学習済みモデル出力" --> S3_Model
-    TrainJob -- "モデル更新をIoT Coreへ通知" --> IoTCore
+    %% エッジPCとAWS連携
+    Logic -- "メトリクス・ログ・温度送信 (HTTPS)" --> APIGW
+    Logic -- "署名付きURLの要求 (HTTPS)" --> APIGW
+    Logic -- "最新画像UP (HTTPS)" --> S3_Img
+    Logic -- "新モデルDL (HTTPS)" --> S3_Model
+    APIGW -. "署名付きURLを返却 (HTTPS)" .-> Logic
+    IoTCore -- "遠隔操作・DL通知・設定反映"--> Logic
+
+    %% AWS内部連携
+    APIGW -- "処理委譲" --> Lambda
+    Lambda -- "データ読み書き (HTTPS)" --> Database
+    WebUI -- "データ閲覧・設定変更 (HTTPS)" --> APIGW
+    Lambda -- "設定変更の反映 (MQTT over TLS)" --> IoTCore
+
+    %% WEBと外部連携
+    WebUI -- "遠隔操作 (MQTT over WS)" --> IoTCore
+    Lambda -- "PUSH通知 (HTTPS) " --> Line
+
+    %% 開発パイプライン (Local Training)
+    DevPC -- "学習元データ取得 (HTTPS)" --> S3_Img
+    DevPC -- "新モデルUP (HTTPS)" --> S3_Model
+    DevPC -- "モデル更新通知 (MQTT over TLS)" --> IoTCore
 ```
-※遠隔操作コマンド：緊急停止（キルスイッチ）、手動介入など
 
 ---
 
-### 3.2. クリティカル・シーケンス (検知〜緊急停止)
-緊急停止（キルスイッチ）が他の通信に依存せず、最優先で処理される流れです。
+### 3.2. シーケンスの例 (緊急停止)
+緊急停止（キルスイッチ）が他の通信に依存せず、最優先で処理される流れ。
 
 ```mermaid
 sequenceDiagram
-    participant User as 飼い主 (WebUI)
+    participant User as 飼い主 (Vercel WebUI)
     participant Cloud as AWS IoT Core
-    participant Edge as エッジPC (N100)
-    participant Dev as ロボット (ESP32)
+    participant Logic as エッジPC (Logic)
+    participant Broker as Local Broker
+    participant Robot as ロボット (ESP32)
 
-    Note over Edge, Dev: 排泄検知・出動中
+    Note over Logic, Robot: 排泄検知・出動中
     
     User->>Cloud: 【緊急停止】 (MQTT Publish)
-    Cloud-->>Edge: 【緊急停止】 (MQTT Subscribe)
+    Cloud-->>Logic: 【緊急停止】 (MQTT Subscribe)
     
     par 停止処理
-        Edge->>Edge: 推論・移動計算を即時破棄
-        Edge->>Dev: 全モーター停止命令 (MQTT)
+        Logic->>Logic: 推論・移動計算を即時破棄
+        Logic->>Broker: 全モーター停止命令 (MQTT Pub)
+        Broker-->>Robot: 停止命令 (MQTT Sub)
     end
     
-    Dev-->>Dev: 通信途絶時も自律停止(Watchdog)
-    Edge-->>User: 停止完了通知 (HTTPS/LINE)
+    Robot-->>Robot: 通信途絶時も自律停止(Watchdog)
+    Logic-->>User: 停止完了通知 (HTTPS/LINE)
 ```
 
 ---
 
 ## 4. セキュリティ設計
 
-### 4.1. デバイス認証と認可
-*   **X.509 証明書認証:** エッジPCは AWS IoT Core に個別の証明書を用いて接続し、不正なデバイスのなりすましを防止する。
-*   **Cognito 連携:** WebUI（飼い主）の認証は Amazon Cognito を使用し、正当な権限を持つユーザーのみが緊急停止を実行できる。
+### 4.1. 認証と認可 (Identity & Access Management)
+*   **デバイス認証 (X.509 証明書):** エッジPCは、個別の X.509 証明書を用いて AWS IoT Core へ接続する。これにより、デバイスのなりすましを物理的に防止する。
+*   **ユーザー認証 (Amazon Cognito):** 飼い主のログイン管理には Cognito User Pools を使用し、多要素認証 (MFA) の導入を可能にする。
+*   **リソース認可 (Cognito Identity Pools):** ログインしたユーザーに対し、IAM ロールを介して「特定の IoT トピックへの Publish」や「API Gateway へのアクセス」を一時的に許可する（最小権限の原則）。
 
-### 4.2. キルスイッチの堅牢性
-*   **QoS 1 (少なくとも1回配信):** 緊急停止信号は AWS IoT Core の QoS 1 を使用し、パケットロスによる「止まらない」リスクを最小化する。
-*   **LWT (遺言機能):** エッジPCが通信断絶（Wi-Fi落ち等）した場合、AWS IoT Core が即座に「オフライン状態」を検知し、WebUIに警告を表示する。
+### 4.2. データ保護とバイナリ通信 (Data Security)
+*   **S3 署名付きURL (Presigned URL):** 
+    *   **アップロード:** エッジPCが画像をアップロードする際、Lambda が発行した「5分間有効な書き込み専用URL」を使用する。S3 バケットを公開設定にする必要はない。
+    *   **ダウンロード:** AIモデルやスナップショットの取得も同様に、有効期限付きの読み取り専用URLを介して行い、資産の漏洩を防止する。
+*   **保存データの暗号化 (At Rest):** DynamoDB のログデータおよび S3 上のファイルは、AWS KMS (Key Management Service) を用いて常に暗号化された状態で保管する。
 
-### 4.3. データベースおよびストレージの安全性
-*   **RDS VPC配置:** データベースはプライベートサブネットに配置し、インターネットからの直接アクセスを遮断。App Runner からのみアクセスを許可する。
-*   **S3 署名付きURL:** エッジPCからの画像アップロードやモデルダウンロードには、App Runnerが発行する一時的な署名付きURLを使用し、バケット自体の公開を防止する。
+### 4.3. 通信の安全性 (Transit Security)
+*   **常時 TLS 1.2+:** エッジ、クラウド、WebUI 間のすべての通信（HTTPS, MQTT over TLS, MQTT over WS）は TLS 1.2 以上で暗号化される。
+*   **API Gateway 認可:** すべての API エンドポイントには `Cognito Authorizer` を設定し、正当なトークンを持つリクエスト以外を遮断する。
+*   **ローカル MQTT 制限:** エッジ内の Mosquitto は外部ネットワークからのアクセスを遮断し、エッジPC内部および特定のローカルIP（ESP32）からのみ接続を許可する。
+
+### 4.4. キルスイッチと可用性の担保
+*   **QoS 1 (At Least Once):** 緊急停止信号は、AWS IoT Core および Local Broker において QoS 1 を使用し、パケットロス発生時も確実に再送・到達させる。
+*   **LWT (Last Will and Testament):** エッジPCが通信断絶（Wi-Fi落ち等）した場合、AWS IoT Core が即座に「オフライン状態」を検知し、WebUIに警告を表示する（遺言メッセージ機能）。
+
+### 4.5. 認証情報の管理
+*   **環境変数の活用:** Vercel や Lambda における API キーやエンドポイント情報は、コード内にハードコードせず、各プラットフォームの環境変数（Secrets）として管理する。
+*   **IAM ロール:** Lambda 関数には、DynamoDB や S3 へのアクセスに必要な最小限の権限のみを持つ IAM ロールを付与する。
 
 ---
 
@@ -126,9 +166,10 @@ sequenceDiagram
 | 経路 | プロトコル | 用途 | 備考 |
 | :--- | :--- | :--- | :--- |
 | **カメラ → エッジPC** | RTSP | 視覚入力 | ローカル内で完結。クラウドへ動画は送らない。 |
-| **エッジPC ⇔ ESP32** | MQTT (Local) | デバイス制御 | 100ms以下の超低遅延制御。 |
-| **WebUI ⇔ IoT Core** | MQTT over WS | **緊急停止** | ブラウザから双方向・即時通信を実現。 |
-| **エッジ ⇔ IoT Core** | MQTT over TLS | 遠隔介入 | 証明書認証による安全なNAT越え。 |
-| **エッジ → App Runner** | HTTPS | 状態同期 | 検知画像やログの永続化用。 |
-| **WebUI → App Runner** | HTTPS | データ閲覧 | 過去ログや統計データの取得。 |
-| **SageMaker ⇔ S3** | AWS SDK | 再学習 | 画像の読込およびモデルファイルの書出。 |
+| **Logic ⇔ Local Broker** | MQTT (TCP) | 内部中継 | エッジPC内でのプロセス間通信。 |
+| **Local Broker ⇔ ESP32** | MQTT (TCP) | デバイス制御 | 自宅Wi-Fi内での低遅延制御。 |
+| **Vercel ⇔ IoT Core** | MQTT over WS | **緊急停止** | ブラウザから双方向・即時通信を実現。 |
+| **IoT Core → Logic** | MQTT over TLS | 遠隔介入 | 証明書認証による安全なNAT越えとクラウド連携。 |
+| **Logic → API Gateway** | HTTPS | 状態同期 | 検知画像やログの永続化、通知用。 |
+| **Vercel → API Gateway** | HTTPS | データ閲覧 | DynamoDBからの履歴取得。 |
+| **Dev PC ⇔ S3** | HTTPS | 学習プロセス | 画像データの取得と学習済みモデルの配布。 |
