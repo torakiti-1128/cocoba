@@ -15,7 +15,7 @@
 | :--- | :--- | :--- | :--- |
 | **ローカル** | ロジック・推論 | Python 3.11, YOLOv8n,  OpenCV,  ONNX Runtime | AWS連携・AI推論・デバイス制御を統合管理 |
 |  | デバイス制御中継 | Eclipse Mosquitto | クラウド遮断時もデバイス制御を継続するためのローカルブローカー |
-|  | 制御マイコン | ESP32 (C++17, Arduino FW) | デュアルコアによる通信と制御の完全分離(FreeRTOS) |
+|  | 制御マイコン | ESP32 (C++17, PlatformIO) | デュアルコアによる通信と制御の完全分離(FreeRTOS) |
 | | 学習プロセス | Python 3.11, YOLOv8, OpenCV | ローカルのリソースを用いたモデル学習 |
 | **クラウド** | API エントリ | Amazon API Gateway | セキュアなエンドポイント提供とLambdaへのルーティング |
 | | バックエンド | AWS Lambda (Python) | イベント駆動による低コストかつスケーラブルな環境 |
