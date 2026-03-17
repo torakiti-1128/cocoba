@@ -25,14 +25,18 @@
 ├── data/                  # [学習] YOLO追加学習用の生画像・アノテーションデータ
 ├── docs/                  # [仕様書] 要件・設計・ルール
 ├── hardware/              # [物理] 3Dモデル(.stl), 回路図, 部品表(BOM)
-├── infrastructure/        # [基盤] docker-compose.yml
+├── infrastructure/        # [基盤] API Gatewayの定義、Mosquitto設定、IaC(AWS SAM等)、docker
 ├── models/                # [推論] 学習済みAIモデル群 (.pt, .onnx, OpenVINO IR等)
 ├── scripts/               # [構築] 汎用スクリプト群 (ISSUE追加、セットアップ)
 ├── src/                   # [実装] システムソースコード群
-│   ├── inference/         # └─ 1. 推論エンジン・カメラ制御 (Python/ONNX)
-│   ├── firmware/          # └─ 2. ESP32ハードウェア制御 (C++/PlatformIO)
-│   ├── backend/           # └─ 3. 状態同期・通信ブローカー (Python/FastAPI)
-│   └── frontend/          # └─ 4. 遠隔監視操作盤 (Next.js/TypeScript)
+│   ├── edge/              # ├── エッジPCのロジック
+│   │   ├── inference/     # │   ├─ AI推論、カメラ映像処理 (YOLO / OpenCV)
+│   │   ├── control/       # │   ├─ 内部のMQTTパブリッシュ/サブスクライブ処理
+│   │   └── bridge/        # │   └─ AWS IoT CoreおよびS3との通信・URL要求
+│   ├── firmware/          # ├── ESP32ハードウェア制御 (C++/PlatformIO)
+│   ├── functions/         # ├── DB操作、外部連携 (Lambda/Python)
+│   └── frontend/          # └── 遠隔監視UI (Next.js)
+│   └── training/          # └── ローカル学習パイプライン
 ├── .gitignore             # [Git] データセットやコンパイル成果物等の除外設定
 ├── CLAUDE.md              # [AI] AIエージェント起動シーケンス
 └── README.md              # [説明] プロジェクトの説明とセットアップ手順
