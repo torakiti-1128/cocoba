@@ -14,8 +14,35 @@ fi
 
 FILE_PATH=$1
 
+# 1. ファイルの存在確認
 if [ ! -f "$FILE_PATH" ]; then
   echo "エラー: ファイルが見つかりません -> $FILE_PATH"
+  exit 1
+fi
+
+# 2. ファイルの権限チェックと自動修復 (Ubuntu環境を想定)
+if [ ! -r "$FILE_PATH" ] || [ ! -w "$FILE_PATH" ]; then
+  echo "警告: ファイルの読み書き権限がありません -> $FILE_PATH"
+  echo "権限の自動付与（chmod u+rw）を試みます..."
+  chmod u+rw "$FILE_PATH" 2>/dev/null
+  
+  # 修復後も読み書きできない場合（所有者がroot等になっている場合）
+  if [ ! -r "$FILE_PATH" ] || [ ! -w "$FILE_PATH" ]; then
+    echo "エラー: 権限の自動修復に失敗しました（所有権の問題の可能性があります）。"
+    echo "以下のコマンドでファイルの所有者を確認し、修正してください:"
+    echo "  sudo chown \$USER:\$USER $FILE_PATH"
+    exit 1
+  fi
+  echo "権限の修復に成功しました。"
+  echo "----------------------------------------"
+fi
+
+# 3. ディレクトリの書き込み権限チェック (mvコマンドのため)
+DIR_NAME=$(dirname "$FILE_PATH")
+if [ ! -w "$DIR_NAME" ]; then
+  echo "エラー: ディレクトリの書き込み権限がないため、後のリネーム処理が実行できません -> $DIR_NAME"
+  echo "以下のコマンドでディレクトリの権限を修正してください:"
+  echo "  sudo chown \$USER:\$USER $DIR_NAME"
   exit 1
 fi
 
@@ -65,7 +92,6 @@ if [[ "$ISSUE_TITLE" =~ ^([a-zA-Z]+)\(([a-zA-Z_-]+)\):\ (.*)$ ]]; then
     BRANCH_NAME="${PREFIX}/${SCOPE}/${ISSUE_NUMBER}-${TASK_NAME}"
     
     # Markdownファイルのリネーム (例: docs/06_ISSUES/12-yolo-setup.md)
-    DIR_NAME=$(dirname "$FILE_PATH")
     NEW_FILE="${DIR_NAME}/${ISSUE_NUMBER}-${TASK_NAME}.md"
     
     mv "$FILE_PATH" "$NEW_FILE"
