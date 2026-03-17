@@ -7,35 +7,43 @@
 * **`dev` ブランチ:** 開発の主軸。実装工程における機能追加やバグ修正は、すべてこのブランチに向けて統合される。
 
 ## 2. ブランチ運用と命名規則
-作業を行う際は、必ず `dev`（ドキュメント策定フェーズであれば `main`）から派生ブランチを作成する。ブランチ名は「すべて小文字のケバブケース（ハイフン区切り）」とする。
+作業を行う際は、必ず `dev`（ドキュメント策定フェーズであれば `main`）から派生ブランチを作成する。ブランチ名はIssueの「プレフィックス（Type）」および「スコープ（対象モジュール）」と完全に連動させ、階層構造（ディレクトリ構造）を持たせる。
 
-* `docs/xxx-xxx` : ドキュメントの作成・修正 (例: `docs/00-overview`)
-* `feat/xxx-xxx` : 新機能の開発、モジュールの追加 (例: `feat/yolo-inference`)
-* `fix/xxx-xxx` : バグ修正、ハードウェアの不具合対応 (例: `fix/motor-torque`)
-* `test/xxx-xxx` : テストコードの追加、検証作業 (例: `test/camera-fps`)
-* `hw/xxx-xxx` : ハードウェア・3Dモデル・回路図の変更 (例: `hw/dispenser-cad`)
+* **命名形式:** `【Type】/【Scope】/【Issue番号】-【ケバブケースのタスク名】`
+* `feat/inference/12-yolo-setup` : 新機能の開発、モジュールの追加
+* `fix/firmware/34-motor-torque` : バグ修正、ハードウェアの不具合対応
+* `docs/rule/5-issue-management` : ドキュメントの作成・修正
+* `refactor/backend/18-mqtt-client`: 機能を変えないコード構造の改善
+* `test/inference/22-camera-fps` : テストコードの追加、検証作業
+* `chore/infrastructure/3-docker-setup`: ビルドプロセス、環境構築等の雑務
 
 ## 3. コミットメッセージ規約
-AIが進捗を正確にトラッキングし、かつタスクのトレーサビリティを確保するため、[Conventional Commits](https://www.conventionalcommits.org/) に準拠し、**必ず末尾に対応するIssue番号を付与する**ことを強制する。
+AIが進捗を正確にトラッキングし、かつタスクのトレーサビリティを確保するため、[Conventional Commits](https://www.conventionalcommits.org/) に準拠し、**Issueのタイトル・ブランチ名と完全一致する「Type（プレフィックス）」「Scope（モジュール境界）」「Issue番号」**の付与を強制する。
 
 **【フォーマット】**
 `<type>(<scope>): <subject> (#<Issue番号>)`
 
 **【Type一覧】**
-* `feat`: 新機能（Pythonコード、ESP32実装など）
-* `fix`: バグ修正
-* `docs`: ドキュメントのみの変更
-* `style`: コードの動作に影響しないフォーマット修正（Linter対応など）
-* `refactor`: バグ修正や機能追加を行わないコードの書き換え
-* `test`: テストの追加・修正
-* `chore`: ビルドプロセスやツール、インフラ（Docker等）の変更
+* `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
+
+**【Scope一覧（対象モジュール）】** ※アーキテクチャ定義と完全一致させること
+* `inference`: エッジAI推論・カメラ制御 (`src/inference/`)
+* `firmware`: ESP32ハードウェア制御 (`src/firmware/`)
+* `backend`: 状態同期・通信ブローカー (`src/backend/`)
+* `frontend`: 遠隔監視操作盤 (`src/frontend/`)
+* `hardware`: 3Dモデル・回路図・部品 (`hardware/`)
+* `infrastructure`: Docker・CI/CD等のインフラ基盤 (`infrastructure/`, `.github/`)
+* `script`: 汎用スクリプト (`scripts/`)
+* `rule`: 開発規約・全体アーキテクチャ (`docs/`)
+* `other`: 上記のスコープ以外
 
 **【良いコミット例】**
-* ✅ `feat(vision): YOLOv8による排泄物のバウンディングボックス抽出を実装 (#12)`
-* ✅ `fix(esp32): Wi-Fi切断時の再接続ループによるウォッチドッグタイムアウトを修正 (#34)`
+* ✅ `feat(inference): YOLOv8による排泄物のバウンディングボックス抽出を実装 (#12)`
+* ✅ `fix(firmware): Wi-Fi切断時の再接続ループによるウォッチドッグタイムアウトを修正 (#34)`
 * ✅ `docs(rules): バージョン管理規約にdevブランチとIssue紐付けのルールを追加 (#5)`
 
 **【禁止事項】**
+* ❌ スコープ（括弧内のモジュール名）の記載漏れ（AIがどの領域の変更かパースできなくなるため厳禁）。
 * ❌ Issue番号の記載漏れ（追跡不可能な「孤児コミット」を生むため厳禁）。
 * ❌ 複数のIssueにまたがる変更を1つのコミットにまとめること。
 
