@@ -119,17 +119,26 @@ graph TB
 ## ディレクトリ構成
 
 ```text
-├── data/                  # AI学習用データセット（画像・アノテーション）
-├── docs/                  # 要件定義・設計・開発ルール等の仕様書一式
-├── hardware/              # 3Dモデル(.stl), 回路図, 部品表(BOM)
-├── infrastructure/        # Terraform/CloudFormation (AWSリソース定義)
-├── models/                # 学習済みAIモデル (.onnx)
-├── scripts/               # 汎用スクリプト (Issue追加、セットアップ)
-└── src/
-    ├── inference/         # エッジAI推論・制御ロジック (Python)
-    ├── firmware/          # ESP32ファームウェア (C++)
-    ├── backend/           # AWS Lambda バックエンド関数 (Python)
-    └── frontend/          # Vercel 遠隔監視ダッシュボード (Next.js/TypeScript)
+├── .claude/               # [AI] スキル・ログ・設定値の格納
+├── .github/               # [CI/CD] GitHub Actionsのワークフロー定義
+├── data/                  # [学習] YOLO追加学習用の生画像・アノテーションデータ
+├── docs/                  # [仕様書] 要件・設計・ルール
+├── hardware/              # [物理] 3Dモデル(.stl), 回路図, 部品表(BOM)
+├── infrastructure/        # [基盤] API Gatewayの定義、Mosquitto設定、IaC(AWS SAM等)、docker
+├── models/                # [推論] 学習済みAIモデル群 (.pt, .onnx, OpenVINO IR等)
+├── scripts/               # [構築] 汎用スクリプト群 (ISSUE追加、セットアップ)
+├── src/                   # [実装] システムソースコード群
+│   ├── edge/              # ├── エッジPCのロジック
+│   │   ├── inference/     # │   ├─ AI推論、カメラ映像処理 (YOLO / OpenCV)
+│   │   ├── control/       # │   ├─ 内部のMQTTパブリッシュ/サブスクライブ処理
+│   │   └── bridge/        # │   └─ AWS IoT CoreおよびS3との通信・URL要求
+│   ├── firmware/          # ├── ESP32ハードウェア制御 (C++/PlatformIO)
+│   ├── functions/         # ├── DB操作、外部連携 (Lambda/Python)
+│   └── frontend/          # └── 遠隔監視UI (Next.js)
+│   └── training/          # └── ローカル学習パイプライン
+├── .gitignore             # [Git] データセットやコンパイル成果物等の除外設定
+├── CLAUDE.md              # [AI] AIエージェント起動シーケンス
+└── README.md              # [説明] プロジェクトの説明とセットアップ手順
 ```
 
 ---
