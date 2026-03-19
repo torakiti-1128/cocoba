@@ -1,4 +1,4 @@
-# 03_HARDWARE_ARCHITECTURE（ハードウェアアーキテクチャ設計）
+# 02_HARDWARE_ARCHITECTURE（ハードウェアアーキテクチャ設計）
 
 ## 1. ハードウェア基本方針：分離と物理的フェイルセーフ
 

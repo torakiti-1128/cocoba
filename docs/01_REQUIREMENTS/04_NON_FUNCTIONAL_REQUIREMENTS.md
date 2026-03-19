@@ -1,0 +1,1 @@
+# 04_FUNCTIONAL_REQUIREMENTS.md（非機能要件）
