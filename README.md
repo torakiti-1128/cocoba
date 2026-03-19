@@ -130,7 +130,7 @@ graph TB
 ├── src/                   # [実装] システムソースコード群
 │   ├── edge/              # ├── エッジPCのロジック
 │   │   ├── inference/     # │   ├─ AI推論、カメラ映像処理 (YOLO / OpenCV)
-│   │   ├── control/       # │   ├─ 内部のMQTTパブリッシュ/サブスクライブ処理
+│   │   ├── device/        # │   ├─ 内部のMQTTパブリッシュ/サブスクライブ処理
 │   │   └── bridge/        # │   └─ AWS IoT CoreおよびS3との通信・URL要求
 │   ├── firmware/          # ├── ESP32ハードウェア制御 (C++/PlatformIO)
 │   ├── functions/         # ├── DB操作、外部連携 (Lambda/Python)
