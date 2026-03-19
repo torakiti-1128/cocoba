@@ -83,7 +83,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 safe-area-bottom shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-        <div className="flex justify-around items-center max-w-md mx-auto h-20 px-2">
+        <div className="flex justify-around items-center max-w-md mx-auto h-24 pb-8 px-2">
           <NavItem href="/" icon={<Home />} label="ホーム" active={pathname === "/"} />
           <NavItem href="/control" icon={<Gamepad2 />} label="操作" active={pathname === "/control"} />
           <NavItem href="/log" icon={<ClipboardList />} label="ログ" active={pathname === "/log"} />
