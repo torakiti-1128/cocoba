@@ -96,13 +96,13 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
 function NavItem({ href, icon, label, active }: { href: string, icon: React.ReactElement, label: string, active: boolean }) {
   return (
-    <Link href={href} className="flex flex-col items-center justify-center gap-1.5 w-1/4 h-full relative group">
-      <div className={`p-2 rounded-xl transition-all duration-300 ${
+    <Link href={href} className="flex flex-col items-center justify-center gap-0 w-1/4 h-full relative group">
+      <div className={`p-1 rounded-xl transition-all duration-300 ${
         active ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
       }`}>
-        {React.cloneElement(icon as React.ReactElement<{ size?: number; strokeWidth?: number }>, { size: 24, strokeWidth: active ? 2.5 : 2 })}
+        {React.cloneElement(icon, { size: 22, strokeWidth: active ? 2.5 : 2 })}
       </div>
-      <span className={`text-[10px] font-bold transition-all duration-300 ${
+      <span className={`text-[9px] font-black transition-all duration-300 -mt-1 ${
         active ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
       }`}>
         {label}
@@ -116,3 +116,4 @@ function NavItem({ href, icon, label, active }: { href: string, icon: React.Reac
     </Link>
   );
 }
+
