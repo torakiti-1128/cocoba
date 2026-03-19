@@ -100,7 +100,7 @@ function NavItem({ href, icon, label, active }: { href: string, icon: React.Reac
       <div className={`p-2 rounded-xl transition-all duration-300 ${
         active ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
       }`}>
-        {React.cloneElement(icon, { size: 24, strokeWidth: active ? 2.5 : 2 })}
+        {React.cloneElement(icon as React.ReactElement<{ size?: number; strokeWidth?: number }>, { size: 24, strokeWidth: active ? 2.5 : 2 })}
       </div>
       <span className={`text-[10px] font-bold transition-all duration-300 ${
         active ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
