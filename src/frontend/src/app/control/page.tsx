@@ -4,8 +4,7 @@ import React, { useState } from "react";
 import { useCocobaStore } from "@/store/useCocobaStore";
 import { 
   Candy, Shield, Home, RefreshCw, StopCircle, 
-  Power, RotateCcw, Camera, Brain, Wifi, HardDrive, Trash2,
-  AlertOctagon, EyeOff
+  AlertOctagon, EyeOff, Brain
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -22,7 +21,7 @@ export default function Control() {
     <div className="flex flex-col gap-8 pb-20">
       <header>
         <h2 className="text-xl font-bold tracking-tight">手動コマンドセンター</h2>
-        <p className="text-xs text-slate-500 font-medium">各モジュールへ即時命令を送信します</p>
+        <p className="text-xs text-slate-500 font-medium">各システムへ即時命令を送信します</p>
       </header>
 
       {/* 1. Main Actions (Big Tiles) */}
@@ -51,26 +50,19 @@ export default function Control() {
       <section>
         <h3 className="text-[10px] font-black text-red-500 uppercase tracking-[0.2em] mb-4 ml-1 flex items-center gap-2">
           <AlertOctagon className="w-3 h-3" />
-          モジュール個別停止
+          個別停止
         </h3>
         <div className="grid grid-cols-2 gap-3">
+          <StopButton 
+            icon={<StopCircle className="w-4 h-4" />} 
+            label="全システム停止" 
+            onClick={() => handleAction("kill")} 
+          />
           <StopButton icon={<BotIcon />} label="ルンバ停止" onClick={() => handleAction("stop_robot")} />
           <StopButton icon={<Shield className="w-4 h-4" />} label="シールド停止" onClick={() => handleAction("stop_shield")} />
           <StopButton icon={<Candy className="w-4 h-4" />} label="シューター停止" onClick={() => handleAction("stop_shooter")} />
           <StopButton icon={<Brain className="w-4 h-4" />} label="AI推論停止" onClick={() => handleAction("stop_inference")} />
-          <StopButton icon={<EyeOff className="w-4 h-4" />} label="カメラ停止" onClick={() => handleAction("stop_camera")} className="col-span-2" />
-        </div>
-      </section>
-
-      {/* 3. System Maintenance (List) */}
-      <section>
-        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">システムメンテナンス</h3>
-        <div className="flex flex-col gap-3">
-          <MaintenanceRow icon={<RotateCcw className="w-4 h-4" />} label="推論プロセス再起動" sub="AIモデルの再ロード" />
-          <MaintenanceRow icon={<Power className="w-4 h-4" />} label="ESP32ハードリセット" sub="マイコンの物理再起動" />
-          <MaintenanceRow icon={<Wifi className="w-4 h-4" />} label="通信テスト (Ping)" sub="ESP32との疎通確認" />
-          <MaintenanceRow icon={<HardDrive className="w-4 h-4" />} label="ストレージ整合性チェック" sub="SDカード/DBの診断" />
-          <MaintenanceRow icon={<Trash2 className="w-4 h-4" />} label="一時ログの消去" sub="不要なキャッシュを削除" color="text-red-500" />
+          <StopButton icon={<EyeOff className="w-4 h-4" />} label="カメラ停止" onClick={() => handleAction("stop_camera")} />
         </div>
       </section>
 
@@ -108,37 +100,18 @@ function MainCommandButton({ icon, label, color, onClick }: { icon: any, label: 
   );
 }
 
-function StopButton({ icon, label, onClick, className }: { icon: any, label: string, onClick: () => void, className?: string }) {
+function StopButton({ icon, label, onClick, className, iconBg = "bg-red-50 text-red-600", labelColor = "text-slate-700" }: { icon: any, label: string, onClick: () => void, className?: string, iconBg?: string, labelColor?: string }) {
   return (
     <motion.button 
       whileTap={{ scale: 0.98 }}
       className={`bg-white border-2 border-red-50 hover:border-red-100 p-4 rounded-2xl flex items-center gap-3 shadow-sm ${className}`}
       onClick={onClick}
     >
-      <div className="bg-red-50 p-2 rounded-xl text-red-600">
+      <div className={`${iconBg} p-2 rounded-xl`}>
         {icon}
       </div>
-      <span className="font-bold text-xs text-slate-700">{label}</span>
+      <span className={`font-bold text-xs ${labelColor}`}>{label}</span>
     </motion.button>
-  );
-}
-
-function MaintenanceRow({ icon, label, sub, color = "text-blue-600" }: { icon: any, label: string, sub: string, color?: string }) {
-  return (
-    <div className="bg-white border border-slate-200 p-4 rounded-2xl flex items-center justify-between shadow-sm active:bg-slate-50">
-      <div className="flex items-center gap-4">
-        <div className="bg-slate-50 p-2.5 rounded-xl text-slate-400">
-          {icon}
-        </div>
-        <div>
-          <p className="font-bold text-xs text-slate-700 leading-none mb-1">{label}</p>
-          <p className="text-[9px] text-slate-400 font-medium tracking-tight">{sub}</p>
-        </div>
-      </div>
-      <button className={`text-[9px] font-black uppercase tracking-widest px-3 py-2 bg-slate-50 rounded-xl hover:bg-slate-100 ${color}`}>
-        RUN
-      </button>
-    </div>
   );
 }
 
