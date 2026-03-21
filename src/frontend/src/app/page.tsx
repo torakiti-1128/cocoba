@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useCocobaStore } from "@/store/useCocobaStore";
 import { 
-  RefreshCw, Dog, Bot, Cloud, Activity, Info, Eye, Zap, Clock, History
+  RefreshCw, Dog, Bot, Cloud, Activity, Info, Eye, Clock, History, Timer
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { 
@@ -85,10 +85,11 @@ export default function Dashboard() {
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 ml-1">詳細メトリクス</h3>
         <div className="grid grid-cols-3 gap-3">
           <MetricCard icon={<Activity className="w-4 h-4" />} label="ここちゃん活動率" value="42%" trend="+5%" />
-          <MetricCard icon={<Zap className="w-4 h-4" />} label="ルンバ温度" value="38.5℃" trend="-1.2℃" />
+          <MetricCard icon={<Timer className="w-4 h-4" />} label="ルンバ稼働時間" value="12.5h" trend="+1.2h" />
           <MetricCard icon={<History className="w-4 h-4" />} label="ウンチの回数" value="2回" trend="±0" />
         </div>
       </section>
+
 
       {/* 4. Environment Tile */}
       <section className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-4 text-white shadow-lg shadow-blue-200">
