@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useCocobaStore } from "@/store/useCocobaStore";
-import { AlertCircle, Home, Gamepad2, ClipboardList, Settings, User } from "lucide-react";
+import { AlertCircle, Home, Gamepad2, ClipboardList, Settings, User, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,35 +18,31 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         <div className="flex items-center">
           <h1 className="font-black text-2xl tracking-tighter text-[#CD853F]">Cocoba</h1>
         </div>
-        
-        <div className="flex items-center gap-3">
-          <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black border ${
-            isOnline ? "bg-green-50 text-green-600 border-green-100" : "bg-red-50 text-red-600 border-red-100"
-          }`}>
-            <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
-            {isOnline ? "ONLINE" : "OFFLINE"}
-          </div>
-
-          <button className="p-1.5 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors border border-slate-100">
-            <User className="w-4 h-4 text-slate-500" />
-          </button>
-        </div>
       </header>
 
-      {/* Kill Switch (Global Safety) */}
-      <div className="sticky top-[57px] z-40 bg-white px-4 py-2 border-b border-slate-200 shadow-sm">
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            if (confirm("全システムを緊急停止しますか？")) {
-              killSwitch();
-            }
-          }}
-          className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 shadow-lg shadow-red-200 transition-colors"
-        >
-            ルンバを緊急停止
-        </motion.button>
-      </div>
+      {/* Kill Switch (Global Safety - Only shown in Control Tab) */}
+      <AnimatePresence>
+        {pathname === "/control" && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="sticky top-[57px] z-40 bg-white px-4 py-2 border-b border-slate-200 shadow-sm overflow-hidden"
+          >
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                if (confirm("全システムを緊急停止しますか？")) {
+                  killSwitch();
+                }
+              }}
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 shadow-lg shadow-red-200 transition-colors"
+            >
+                ルンバを緊急停止
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Offline Alert Overlay */}
       <AnimatePresence>
@@ -87,7 +83,8 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
           <NavItem href="/" icon={<Home />} label="ホーム" active={pathname === "/"} />
           <NavItem href="/control" icon={<Gamepad2 />} label="操作" active={pathname === "/control"} />
           <NavItem href="/log" icon={<ClipboardList />} label="ログ" active={pathname === "/log"} />
-          <NavItem href="/settings" icon={<Settings />} label="システム" active={pathname === "/settings"} />
+          <NavItem href="/manage" icon={<BarChart3 />} label="管理" active={pathname === "/manage"} />
+          <NavItem href="/settings" icon={<Settings />} label="設定" active={pathname === "/settings"} />
         </div>
       </nav>
     </div>
