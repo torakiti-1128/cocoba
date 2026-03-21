@@ -5,7 +5,7 @@ import { useCocobaStore } from "@/store/useCocobaStore";
 import { 
   RefreshCw, Thermometer, Signal, Package, Wifi, Clock,
   RotateCcw, Power, HardDrive, Trash2, Zap, Camera, Bot, Cloud, Server, Download, Activity,
-  Database, Layers, Cpu, ShieldCheck, Info
+  Database, Layers, Cpu, ShieldCheck, Info, Footprints, Heart
 } from "lucide-react";
 import { 
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip
@@ -49,20 +49,22 @@ export default function Manage() {
       {/* 1. Dead/Alive Monitoring Dashboard (Detailed) */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between ml-1">
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-            <Activity className="w-3 h-3" />
-            死活監視ダッシュボード
+          <h3 className="text-[10px] font-black text-[#A0522D] uppercase tracking-[0.2em] flex items-center gap-2">
+            <Heart className="w-3 h-3 text-orange-400" />
+            システムのけんこう状態
           </h3>
-          <button className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 rounded-full active:bg-blue-100 transition-colors">
-            <RefreshCw className="w-3 h-3" />
-            <span className="text-[9px] font-black uppercase">更新</span>
+          <button className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-[#8B4513] rounded-full active:bg-orange-100 transition-colors">
+            <RefreshCw className="w-2.5 h-2.5" />
+            <span className="text-[9px] font-black uppercase tracking-tighter">再読み込み</span>
           </button>
         </div>
 
         {/* Local Environment */}
-
-        <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
-          <p className="text-[10px] text-slate-400 font-bold uppercase mb-4">ローカル環境</p>
+        <div className="bg-white border border-orange-100 rounded-3xl p-5 shadow-sm">
+          <p className="text-[10px] text-[#A0522D] font-bold uppercase mb-4 flex items-center gap-1.5">
+            <Footprints className="w-3 h-3" />
+            おうちのデバイス
+          </p>
           <div className="grid grid-cols-2 gap-x-6 gap-y-4">
             <StatusIndicator icon={<Camera className="w-4 h-4" />} label="ネットワークカメラ" status="ONLINE" />
             <StatusIndicator icon={<Server className="w-4 h-4" />} label="エッジPC (N100)" status="ONLINE" />
@@ -208,27 +210,27 @@ function StatusIndicator({ icon, label, status }: { icon: any, label: string, st
   const isOnline = status === "ONLINE";
   return (
     <div className="flex items-center gap-3">
-      <div className={`p-2 rounded-xl ${isOnline ? "bg-slate-50 text-slate-400" : "bg-red-50 text-red-400"}`}>
+      <div className={`p-2 rounded-xl ${isOnline ? "bg-orange-50 text-orange-400" : "bg-red-50 text-red-400"}`}>
         {icon}
       </div>
       <div>
         <p className="text-[9px] text-slate-400 font-bold leading-none mb-1">{label}</p>
         <div className="flex items-center gap-1.5">
-          <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" : "bg-red-500"}`} />
-          <span className={`text-[10px] font-black ${isOnline ? "text-slate-700" : "text-red-500"}`}>{status}</span>
+          <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? "bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.4)]" : "bg-red-500"}`} />
+          <span className={`text-[10px] font-black ${isOnline ? "text-[#5D4037]" : "text-red-500"}`}>{status}</span>
         </div>
       </div>
     </div>
   );
 }
 
-function MaintenanceButton({ icon, label, onClick, color = "text-slate-700" }: { icon: any, label: string, onClick: () => void, color?: string }) {
+function MaintenanceButton({ icon, label, onClick, color = "text-[#5D4037]" }: { icon: any, label: string, onClick: () => void, color?: string }) {
   return (
     <button 
       onClick={onClick}
-      className="bg-white border border-slate-200 p-4 rounded-2xl flex items-center gap-3 shadow-sm active:bg-slate-50 transition-colors group"
+      className="bg-white border border-orange-50 p-4 rounded-[1.5rem] flex items-center gap-3 shadow-sm active:bg-orange-50 transition-colors group"
     >
-      <div className="bg-slate-50 p-2 rounded-xl text-slate-400 group-active:text-blue-600 transition-colors flex-shrink-0">
+      <div className="bg-orange-50 p-2.5 rounded-xl text-orange-400 group-active:text-[#8B4513] transition-colors flex-shrink-0">
         {icon}
       </div>
       <p className={`font-bold text-[10px] ${color} leading-tight text-left`}>{label}</p>

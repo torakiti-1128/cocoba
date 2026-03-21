@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useCocobaStore } from "@/store/useCocobaStore";
-import { AlertCircle, Home, Gamepad2, ClipboardList, Settings, User, BarChart3 } from "lucide-react";
+import { AlertCircle, Home, Gamepad2, ClipboardList, Settings, User, BarChart3, Footprints, LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,35 +14,40 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center">
-          <h1 className="font-black text-2xl tracking-tighter text-[#CD853F]">Cocoba</h1>
+      <header className="sticky top-0 z-50 bg-[#FAF9F6] border-b border-orange-100 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="bg-[#8B4513] p-1.5 rounded-xl shadow-sm">
+            <Footprints className="w-5 h-5 text-[#FFDAB9]" />
+          </div>
+          <h1 className="font-black text-2xl tracking-tighter text-[#5D4037]">Cocoba</h1>
         </div>
+
+        <button 
+          onClick={() => confirm("ログアウトしますか？")}
+          className="p-2 bg-orange-50 hover:bg-orange-100 text-[#8B4513] rounded-xl transition-colors shadow-sm"
+        >
+          <LogOut className="w-4 h-4" />
+        </button>
       </header>
 
       {/* Kill Switch (Global Safety - Only shown in Control Tab) */}
-      <AnimatePresence>
-        {pathname === "/control" && (
-          <motion.div 
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="sticky top-[57px] z-40 bg-white px-4 py-2 border-b border-slate-200 shadow-sm overflow-hidden"
+      {pathname === "/control" && (
+        <div className="sticky top-[57px] z-40 bg-[#FAF9F6] px-4 py-3 border-b border-orange-100 shadow-sm">
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              if (confirm("全システムを緊急停止しますか？")) {
+                killSwitch();
+              }
+            }}
+            className="w-full bg-[#D32F2F] hover:bg-red-700 text-white font-black py-4 rounded-[2rem] flex items-center justify-center gap-3 shadow-lg shadow-red-100 transition-colors border-2 border-white"
           >
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                if (confirm("全システムを緊急停止しますか？")) {
-                  killSwitch();
-                }
-              }}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 shadow-lg shadow-red-200 transition-colors"
-            >
-                ルンバを緊急停止
-            </motion.button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <AlertCircle className="w-5 h-5 text-red-100" />
+              システムを緊急停止
+          </motion.button>
+        </div>
+      )}
+
 
       {/* Offline Alert Overlay */}
       <AnimatePresence>
@@ -93,21 +98,21 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
 function NavItem({ href, icon, label, active }: { href: string, icon: React.ReactElement, label: string, active: boolean }) {
   return (
-    <Link href={href} className="flex flex-col items-center justify-center gap-0 w-1/4 h-full relative group">
+    <Link href={href} className="flex flex-col items-center justify-center gap-0 w-1/5 h-full relative group">
       <div className={`p-1 rounded-xl transition-all duration-300 ${
-        active ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
+        active ? "text-[#8B4513]" : "text-slate-400 group-hover:text-slate-600"
       }`}>
         {React.cloneElement(icon as React.ReactElement<{ size?: number; strokeWidth?: number }>, { size: 22, strokeWidth: active ? 2.5 : 2 })}
       </div>
       <span className={`text-[9px] font-black transition-all duration-300 -mt-1 ${
-        active ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
+        active ? "text-[#8B4513]" : "text-slate-400 group-hover:text-slate-600"
       }`}>
         {label}
       </span>
       {active && (
         <motion.div 
           layoutId="activeTab"
-          className="absolute -top-[1px] left-0 right-0 h-[3px] bg-blue-600 rounded-full mx-6"
+          className="absolute -top-[1px] left-0 right-0 h-[4px] bg-[#8B4513] rounded-full mx-4"
         />
       )}
     </Link>

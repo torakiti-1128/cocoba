@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useCocobaStore } from "@/store/useCocobaStore";
 import { 
-  RefreshCw, Dog, Bot, Cloud, Activity, Info, Eye, Clock, History, Timer
+  RefreshCw, Dog, Bot, Cloud, Activity, Info, Eye, Clock, History, Timer, Bone, Footprints
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { 
@@ -11,20 +11,24 @@ import {
   AreaChart, Area, Cell
 } from 'recharts';
 
-// Today's Activity (Hourly)
+// Today's Activity (Hourly distribution of states %)
 const ACTIVITY_DATA_TODAY = [
-  { time: '08:00', rate: 20 }, { time: '10:00', rate: 80 },
-  { time: '12:00', rate: 30 }, { time: '14:00', rate: 25 },
-  { time: '16:00', rate: 55 }, { time: '18:00', rate: 90 },
-  { time: '20:00', rate: 40 }, { time: '22:00', rate: 10 },
+  { time: '08:00', active: 20, sleep: 70, poop: 10 }, 
+  { time: '10:00', active: 60, sleep: 40, poop: 0 },
+  { time: '12:00', active: 30, sleep: 50, poop: 20 }, 
+  { time: '14:00', active: 25, sleep: 75, poop: 0 },
+  { time: '16:00', active: 55, sleep: 45, poop: 0 }, 
+  { time: '18:00', active: 80, sleep: 10, poop: 10 },
+  { time: '20:00', active: 40, sleep: 60, poop: 0 }, 
+  { time: '22:00', active: 10, sleep: 90, poop: 0 },
 ];
 
-// Unchi Pose Distribution (Hourly counts)
-const UNCHI_POSE_DATA_TODAY = [
-  { time: '08:00', count: 1 }, { time: '10:00', count: 0 },
-  { time: '12:00', count: 2 }, { time: '14:00', count: 0 },
-  { time: '16:00', count: 0 }, { time: '18:00', count: 1 },
-  { time: '20:00', count: 0 }, { time: '22:00', count: 0 },
+// Robot Work Duration (Hourly in minutes)
+const ROBOT_WORK_DATA_TODAY = [
+  { time: '08:00', duration: 5 }, { time: '10:00', duration: 0 },
+  { time: '12:00', duration: 12 }, { time: '14:00', duration: 0 },
+  { time: '16:00', duration: 0 }, { time: '18:00', duration: 8 },
+  { time: '20:00', duration: 0 }, { time: '22:00', duration: 0 },
 ];
 
 // Monthly Activity Trend (Daily for last 30 days - simplified)
@@ -76,23 +80,25 @@ export default function Dashboard() {
 
       {/* 2. Status Tiles */}
       <section className="grid grid-cols-2 gap-3">
-        <StatusTile icon={<Dog className="w-5 h-5" />} label="ここちゃんの状態" value={systemState === 'IDLE' ? "寝ています" : "活動中"} color="bg-orange-50 text-orange-600" subValue="室温: 24℃" />
-        <StatusTile icon={<Bot className="w-5 h-5" />} label="ルンバの状態" value={systemState === 'IDLE' ? "待機中" : systemState} color="bg-blue-50 text-blue-600" subValue="バッテリー: 85%" />
+        <StatusTile icon={<Dog className="w-5 h-5" />} label="ココちゃんの状態" value={systemState === 'IDLE' ? "寝ています" : "活動中"} color="bg-orange-50 text-orange-600" subValue="室温: 24℃" />
+        <StatusTile icon={<Bone className="w-5 h-5" />} label="ルンバの状態" value={systemState === 'IDLE' ? "待機中" : systemState} color="bg-amber-50 text-[#8B4513]" subValue="バッテリー: 85%" />
       </section>
+
 
       {/* 3. Detailed Metrics Grid */}
       <section>
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 ml-1">詳細メトリクス</h3>
+        <h3 className="text-xs font-bold text-[#A0522D] uppercase tracking-wider mb-3 ml-1">ココちゃん・メトリクス</h3>
         <div className="grid grid-cols-3 gap-3">
-          <MetricCard icon={<Activity className="w-4 h-4" />} label="ここちゃん活動率" value="42%" trend="+5%" />
-          <MetricCard icon={<Timer className="w-4 h-4" />} label="ルンバ稼働時間" value="12.5h" trend="+1.2h" />
-          <MetricCard icon={<History className="w-4 h-4" />} label="ウンチの回数" value="2回" trend="±0" />
+          <MetricCard icon={<Footprints className="w-4 h-4" />} label="ココ活動率" value="42%" trend="+5%" />
+          <MetricCard icon={<Timer className="w-4 h-4" />} label="ルンバ稼働" value="12.5h" trend="+1.2h" />
+          <MetricCard icon={<History className="w-4 h-4" />} label="ウンチ回数" value="2回" trend="±0" />
         </div>
       </section>
 
 
+
       {/* 4. Environment Tile */}
-      <section className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-4 text-white shadow-lg shadow-blue-200">
+      <section className="bg-gradient-to-r from-[#FF8C00] to-[#CD853F] rounded-[2rem] p-5 text-white shadow-lg shadow-orange-100 border-2 border-white/20">
         <div className="flex items-center justify-between text-white">
           <div className="flex items-center gap-3">
             <div className="bg-white/20 p-2 rounded-xl"><Cloud className="w-6 h-6" /></div>
@@ -101,6 +107,7 @@ export default function Dashboard() {
           <div className="text-right"><p className="text-2xl font-bold tracking-tighter">22℃</p></div>
         </div>
       </section>
+
 
       {/* 5. Graphs Section */}
       <section className="flex flex-col gap-4">
@@ -119,37 +126,58 @@ export default function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8'}} />
                 <YAxis hide domain={[0, 100]} />
-                <Tooltip contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '10px'}} />
-                <Bar dataKey="rate" radius={[4, 4, 0, 0]}>
-                  {ACTIVITY_DATA_TODAY.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.rate > 60 ? '#10b981' : '#3b82f6'} />
-                  ))}
-                </Bar>
+                <Tooltip 
+                  cursor={{fill: 'transparent'}}
+                  contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '10px'}} 
+                />
+                <Bar dataKey="sleep" stackId="a" fill="#D2B48C" />
+                <Bar dataKey="active" stackId="a" fill="#8B4513" />
+                <Bar dataKey="poop" stackId="a" fill="#FF7F50" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+          
+          {/* Legend */}
+          <div className="flex gap-4 mt-4 justify-center border-t border-orange-50 pt-4">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-[#FF7F50]" />
+              <span className="text-[10px] font-black text-[#8B4513]/60">うんち</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-[#8B4513]" />
+              <span className="text-[10px] font-black text-[#8B4513]/60">動いている</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-[#D2B48C]" />
+              <span className="text-[10px] font-black text-[#8B4513]/60">寝ている</span>
+            </div>
           </div>
         </div>
 
-        {/* Graph 2: Unchi Pose Trend (NEW) */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
-          <p className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">排泄予兆の発生傾向</p>
-          <h4 className="text-lg font-bold mb-6 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-orange-500" />
-            うんちの時間帯分布
+        {/* Graph 2: Robot Work Trend (NEW) */}
+        <div className="bg-white border border-orange-100 rounded-[2rem] p-5 shadow-sm">
+          <p className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">システムの稼働傾向</p>
+          <h4 className="text-lg font-bold mb-6 flex items-center gap-2 text-[#5D4037]">
+            <Timer className="w-5 h-5 text-[#A0522D]" />
+            ルンバの稼働時間
           </h4>
           <div className="h-40 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={UNCHI_POSE_DATA_TODAY}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8'}} />
-                <YAxis hide allowDecimals={false} />
-                <Tooltip contentStyle={{borderRadius: '12px', border: 'none', fontSize: '10px'}} />
-                <Bar dataKey="count" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+              <BarChart data={ROBOT_WORK_DATA_TODAY}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#fff7ed" />
+                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#A0522D'}} />
+                <YAxis hide />
+                <Tooltip 
+                  cursor={{fill: 'transparent'}}
+                  contentStyle={{borderRadius: '12px', border: 'none', fontSize: '10px'}} 
+                />
+                <Bar dataKey="duration" fill="#A0522D" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <p className="text-[10px] text-slate-400 mt-4 text-center">※ AIが検知したうんちの回数です</p>
+          <p className="text-[10px] text-slate-400 mt-4 text-center">※ 1時間あたりのルンバ走行時間（分）です</p>
         </div>
+
 
         {/* Graph 3: Monthly Trend (NEW) */}
         <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
@@ -193,12 +221,12 @@ function StatusTile({ icon, label, value, color, subValue }: { icon: any, label:
 function MetricCard({ icon, label, value, trend }: { icon: any, label: string, value: string, trend: string }) {
   const isPositive = trend.startsWith('+');
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
-      <div className="text-blue-600 mb-2">{icon}</div>
+    <div className="bg-white border border-orange-100 rounded-2xl p-3 shadow-sm">
+      <div className="text-[#A0522D] mb-2">{icon}</div>
       <p className="text-[10px] text-slate-400 font-bold leading-tight mb-1">{label}</p>
       <div className="flex items-baseline justify-between gap-1">
-        <span className="text-sm font-black text-slate-800">{value}</span>
-        <span className={`text-[8px] font-black ${isPositive ? "text-green-500" : trend === 'Avg' ? "text-slate-400" : "text-blue-500"}`}>{trend}</span>
+        <span className="text-sm font-black text-[#5D4037]">{value}</span>
+        <span className={`text-[8px] font-black ${isPositive ? "text-green-500" : trend === 'Avg' ? "text-slate-400" : "text-orange-400"}`}>{trend}</span>
       </div>
     </div>
   );

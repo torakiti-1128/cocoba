@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { 
   Dog, Package, AlertTriangle, Eye, Image as ImageIcon, 
   ChevronRight, ShieldAlert, Wrench, Clock, Search, X, 
-  CheckCircle2, AlertCircle
+  CheckCircle2, AlertCircle, Footprints, Bone, Heart
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -57,15 +57,15 @@ export default function Log() {
                 <p className="font-bold text-sm text-slate-800">{log.title}</p>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className="text-[10px] text-slate-400 font-bold">{log.date}</span>
-                  <span className="text-[10px] text-blue-600 font-black">{log.time}</span>
+                  <span className="text-[10px] text-[#8B4513] font-black">{log.time}</span>
                 </div>
               </div>
             </div>
             
             <div className="flex items-center gap-2">
               {log.hasImage && (
-                <div className="bg-blue-50 p-2 rounded-xl">
-                  <ImageIcon className="w-4 h-4 text-blue-600" />
+                <div className="bg-orange-50 p-2 rounded-xl">
+                  <ImageIcon className="w-4 h-4 text-orange-500" />
                 </div>
               )}
               <ChevronRight className="w-5 h-5 text-slate-300" />
@@ -130,9 +130,10 @@ export default function Log() {
 
                 <button 
                   onClick={() => setSelectedLog(null)}
-                  className="w-full mt-8 bg-slate-900 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 active:scale-[0.98] transition-all"
+                  className="w-full mt-8 bg-[#8B4513] text-[#FFDAB9] font-black py-4 rounded-[2rem] shadow-xl shadow-orange-100 active:scale-[0.98] transition-all flex items-center justify-center gap-2 border-2 border-white"
                 >
-                  閉じる
+                  <Footprints className="w-4 h-4 text-[#FFDAB9]/60" />
+                  わかった！
                 </button>
               </div>
             </motion.div>
@@ -151,8 +152,8 @@ function FilterTab({ active, label, onClick }: { active: boolean, label: string,
   return (
     <button 
       onClick={onClick}
-      className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-        active ? "bg-slate-900 text-white shadow-md shadow-slate-200" : "bg-white border border-slate-100 text-slate-500"
+      className={`px-4 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all ${
+        active ? "bg-[#8B4513] text-[#FFDAB9] shadow-lg shadow-orange-100" : "bg-white border border-orange-50 text-[#A0522D]/60"
       }`}
     >
       {label}
@@ -162,12 +163,12 @@ function FilterTab({ active, label, onClick }: { active: boolean, label: string,
 
 function LogBadge({ type }: { type: string }) {
   const styles: any = {
-    POOP: { label: '排泄', color: 'bg-orange-100 text-orange-600' },
-    SAFETY: { label: '安全停止', color: 'bg-green-100 text-green-600' },
-    MAINTENANCE: { label: '保守', color: 'bg-blue-100 text-blue-600' },
-    ERROR: { label: '異常', color: 'bg-red-100 text-red-600' },
-    PREDICTION: { label: '予兆', color: 'bg-amber-100 text-amber-600' },
-    SCHEDULE: { label: '稼働予定', color: 'bg-indigo-100 text-indigo-600' },
+    POOP: { label: '排泄', color: 'bg-orange-50 text-orange-600' },
+    SAFETY: { label: '安全停止', color: 'bg-green-50 text-[#10b981]' },
+    MAINTENANCE: { label: '保守', color: 'bg-amber-50 text-[#8B4513]' },
+    ERROR: { label: '異常', color: 'bg-red-50 text-red-600' },
+    PREDICTION: { label: '予兆', color: 'bg-orange-50 text-[#A0522D]' },
+    SCHEDULE: { label: '稼働予定', color: 'bg-slate-50 text-slate-600' },
   };
   const style = styles[type] || { label: '通知', color: 'bg-slate-100 text-slate-600' };
   return <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${style.color}`}>{style.label}</span>;
@@ -176,21 +177,21 @@ function LogBadge({ type }: { type: string }) {
 function LogIcon({ type }: { type: string }) {
   switch (type) {
     case 'POOP':
-      return <div className="bg-orange-100 p-2.5 rounded-xl text-orange-600"><Dog className="w-5 h-5" /></div>;
+      return <div className="bg-orange-50 p-2.5 rounded-2xl text-orange-500"><Dog className="w-5 h-5" /></div>;
     case 'SHOOT':
     case 'DOME':
-      return <div className="bg-blue-100 p-2.5 rounded-xl text-blue-600"><Package className="w-5 h-5" /></div>;
+      return <div className="bg-orange-50 p-2.5 rounded-2xl text-[#8B4513]"><Bone className="w-5 h-5" /></div>;
     case 'SAFETY':
-      return <div className="bg-green-100 p-2.5 rounded-xl text-green-600"><ShieldAlert className="w-5 h-5" /></div>;
+      return <div className="bg-green-50 p-2.5 rounded-2xl text-[#10b981]"><ShieldAlert className="w-5 h-5" /></div>;
     case 'MAINTENANCE':
-      return <div className="bg-blue-100 p-2.5 rounded-xl text-blue-600"><Wrench className="w-5 h-5" /></div>;
+      return <div className="bg-amber-50 p-2.5 rounded-2xl text-[#8B4513]"><Wrench className="w-5 h-5" /></div>;
     case 'PREDICTION':
-      return <div className="bg-amber-100 p-2.5 rounded-xl text-amber-600"><Search className="w-5 h-5" /></div>;
+      return <div className="bg-orange-50 p-2.5 rounded-2xl text-[#A0522D]"><Footprints className="w-5 h-5" /></div>;
     case 'SCHEDULE':
-      return <div className="bg-indigo-100 p-2.5 rounded-xl text-indigo-600"><Clock className="w-5 h-5" /></div>;
+      return <div className="bg-slate-50 p-2.5 rounded-2xl text-slate-500"><Clock className="w-5 h-5" /></div>;
     case 'ERROR':
-      return <div className="bg-red-100 p-2.5 rounded-xl text-red-600"><AlertTriangle className="w-5 h-5" /></div>;
+      return <div className="bg-red-50 p-2.5 rounded-2xl text-red-500"><AlertTriangle className="w-5 h-5" /></div>;
     default:
-      return <div className="bg-slate-100 p-2.5 rounded-xl text-slate-600"><Eye className="w-5 h-5" /></div>;
+      return <div className="bg-slate-50 p-2.5 rounded-2xl text-slate-400"><Eye className="w-5 h-5" /></div>;
   }
 }

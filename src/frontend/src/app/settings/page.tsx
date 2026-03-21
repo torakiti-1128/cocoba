@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { 
   Save, Camera, Candy, Smartphone, FastForward, 
-  ShieldAlert, Clock, Calendar, Bell
+  ShieldAlert, Clock, Calendar, Bell, Footprints, Bone, Heart
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -39,17 +39,17 @@ export default function Settings() {
       </header>
 
       {/* 1. Operation Schedule */}
-      <section className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-        <h3 className="flex items-center gap-2 font-bold text-sm mb-6 text-slate-800">
-          <Calendar className="w-4 h-4 text-indigo-500" />
+      <section className="bg-white border border-orange-100 rounded-[2rem] p-6 shadow-sm">
+        <h3 className="flex items-center gap-2 font-bold text-sm mb-6 text-[#8B4513]">
+          <Calendar className="w-4 h-4 text-orange-400" />
           稼働スケジュール
         </h3>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">稼働日の設定</label>
-            <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
-               <button onClick={() => setScheduleMode("weekdays")} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold ${scheduleMode === "weekdays" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-400"}`}>平日のみ</button>
-               <button onClick={() => setScheduleMode("everyday")} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold ${scheduleMode === "everyday" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-400"}`}>毎日</button>
+            <div className="flex bg-orange-50 p-1 rounded-xl gap-1">
+               <button onClick={() => setScheduleMode("weekdays")} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${scheduleMode === "weekdays" ? "bg-white text-[#8B4513] shadow-sm" : "text-[#A0522D]/40"}`}>平日のみ</button>
+               <button onClick={() => setScheduleMode("everyday")} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${scheduleMode === "everyday" ? "bg-white text-[#8B4513] shadow-sm" : "text-[#A0522D]/40"}`}>毎日</button>
             </div>
           </div>
           <div className="flex items-center justify-between gap-4">
@@ -72,24 +72,24 @@ export default function Settings() {
       </section>
 
       {/* 2. AI & Camera */}
-      <section className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-        <h3 className="flex items-center gap-2 font-bold text-sm mb-6 text-slate-800">
-          <Camera className="w-4 h-4 text-blue-600" />
+      <section className="bg-white border border-orange-100 rounded-[2rem] p-6 shadow-sm">
+        <h3 className="flex items-center gap-2 font-bold text-sm mb-6 text-[#8B4513]">
+          <Camera className="w-4 h-4 text-orange-500" />
           推論・カメラ設定
         </h3>
         <div className="space-y-6">
           <div>
             <div className="flex justify-between items-center mb-4">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">検知信頼度しきい値</label>
-              <span className="text-sm font-black text-blue-600">{(confidence * 100).toFixed(0)}%</span>
+              <span className="text-sm font-black text-[#8B4513] bg-orange-50 px-2 py-0.5 rounded-lg">{(confidence * 100).toFixed(0)}%</span>
             </div>
-            <input type="range" min="0" max="1" step="0.05" value={confidence} onChange={(e) => setConfidence(parseFloat(e.target.value))} className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600" />
+            <input type="range" min="0" max="1" step="0.05" value={confidence} onChange={(e) => setConfidence(parseFloat(e.target.value))} className="w-full h-1.5 bg-orange-50 rounded-lg appearance-none cursor-pointer accent-[#8B4513]" />
           </div>
           <div className="flex items-center justify-between">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">フレームレート</label>
-            <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
+            <div className="flex bg-orange-50 p-1 rounded-xl gap-1">
                {[5, 10, 15].map((v) => (
-                 <button key={v} onClick={() => setFps(v)} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold ${fps === v ? "bg-white text-blue-600 shadow-sm" : "text-slate-400"}`}>{v} FPS</button>
+                 <button key={v} onClick={() => setFps(v)} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${fps === v ? "bg-white text-[#8B4513] shadow-sm" : "text-[#A0522D]/40"}`}>{v} FPS</button>
                ))}
             </div>
           </div>
@@ -97,18 +97,18 @@ export default function Settings() {
       </section>
 
       {/* 3. Robot & Safety */}
-      <section className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-        <h3 className="flex items-center gap-2 font-bold text-sm mb-6 text-slate-800">
-          <ShieldAlert className="w-4 h-4 text-red-500" />
+      <section className="bg-white border border-orange-100 rounded-[2rem] p-6 shadow-sm">
+        <h3 className="flex items-center gap-2 font-bold text-sm mb-6 text-[#8B4513]">
+          <ShieldAlert className="w-4 h-4 text-red-400" />
           ロボット・安全設定
         </h3>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">移動速度</label>
-            <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
+            <div className="flex bg-orange-50 p-1 rounded-xl gap-1">
                {["slow", "standard", "fast"].map((s) => (
-                 <button key={s} onClick={() => setMoveSpeed(s)} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold ${moveSpeed === s ? "bg-white text-slate-800 shadow-sm" : "text-slate-400"}`}>
-                   {s === "slow" ? "低速" : s === "standard" ? "標準" : "高速"}
+                 <button key={s} onClick={() => setMoveSpeed(s)} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${moveSpeed === s ? "bg-white text-[#8B4513] shadow-sm" : "text-[#A0522D]/40"}`}>
+                   {s === "slow" ? "ゆっくり" : s === "standard" ? "ふつう" : "いそいで"}
                  </button>
                ))}
             </div>
@@ -140,42 +140,42 @@ export default function Settings() {
       </section>
 
       {/* 4. Treat Shooter */}
-      <section className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-        <h3 className="flex items-center gap-2 font-bold text-sm mb-6 text-slate-800">
-          <Candy className="w-4 h-4 text-orange-500" />
+      <section className="bg-white border border-orange-100 rounded-[2rem] p-6 shadow-sm">
+        <h3 className="flex items-center gap-2 font-bold text-sm mb-6 text-[#8B4513]">
+          <Bone className="w-4 h-4 text-orange-400" />
           おやつ排出設定
         </h3>
         <div className="flex items-center justify-between">
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">排出時の回転数</label>
           <div className="flex items-center gap-3">
-            <button onClick={() => setTreatRotations(Math.max(1, treatRotations - 1))} className="w-8 h-8 flex items-center justify-center bg-slate-50 rounded-lg text-slate-600 font-bold">-</button>
-            <span className="text-sm font-black text-slate-800">{treatRotations}</span>
-            <button onClick={() => setTreatRotations(Math.min(5, treatRotations + 1))} className="w-8 h-8 flex items-center justify-center bg-slate-50 rounded-lg text-slate-600 font-bold">+</button>
+            <button onClick={() => setTreatRotations(Math.max(1, treatRotations - 1))} className="w-8 h-8 flex items-center justify-center bg-orange-50 rounded-lg text-[#8B4513] font-bold">-</button>
+            <span className="text-sm font-black text-[#5D4037]">{treatRotations}</span>
+            <button onClick={() => setTreatRotations(Math.min(5, treatRotations + 1))} className="w-8 h-8 flex items-center justify-center bg-orange-50 rounded-lg text-[#8B4513] font-bold">+</button>
             <span className="text-[10px] font-bold text-slate-400 ml-1">回</span>
           </div>
         </div>
       </section>
 
       {/* 5. Granular Notifications */}
-      <section className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-        <h3 className="flex items-center gap-2 font-bold text-sm mb-6 text-slate-800">
-          <Bell className="w-4 h-4 text-green-500" />
+      <section className="bg-white border border-orange-100 rounded-[2rem] p-6 shadow-sm">
+        <h3 className="flex items-center gap-2 font-bold text-sm mb-6 text-[#8B4513]">
+          <Heart className="w-4 h-4 text-orange-400" />
           LINE通知設定
         </h3>
         <div className="space-y-4">
           <NotificationToggle label="ウンチを検知したとき" description="Poop detected" enabled={notifyOnPoop} setEnabled={setNotifyOnPoop} />
-          <div className="h-px bg-slate-50" />
+          <div className="h-px bg-orange-50" />
           <NotificationToggle label="ウンチポーズをしたとき" description="Poop pose detected" enabled={notifyOnPose} setEnabled={setNotifyOnPose} />
-          <div className="h-px bg-slate-50" />
+          <div className="h-px bg-orange-50" />
           <NotificationToggle label="シールドを投下したとき" description="Shield deployment complete" enabled={notifyOnDeployed} setEnabled={setNotifyOnDeployed} />
         </div>
       </section>
 
       {/* Save Button */}
-      <div className="fixed bottom-24 left-0 right-0 px-4 bg-gradient-to-t from-slate-50/90 to-transparent pt-8 pb-4">
-        <motion.button whileTap={{ scale: 0.98 }} className="max-w-md mx-auto w-full bg-slate-900 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 shadow-xl">
-          <Save className="w-5 h-5 text-blue-400" />
-          設定を保存・反映する
+      <div className="fixed bottom-24 left-0 right-0 px-4 bg-gradient-to-t from-[#FAF9F6] to-transparent pt-12 pb-4">
+        <motion.button whileTap={{ scale: 0.98 }} className="max-w-md mx-auto w-full bg-[#8B4513] text-[#FFFFFF] font-black py-4 rounded-[2rem] flex items-center justify-center gap-3 shadow-xl shadow-orange-100 border-2 border-white">
+          <Save className="w-5 h-5 text-white" />
+          この設定を反映する
         </motion.button>
       </div>
     </div>
