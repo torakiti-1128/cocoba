@@ -3,8 +3,7 @@
 import React, { useState } from "react";
 import { useCocobaStore } from "@/store/useCocobaStore";
 import { 
-  RefreshCw, Dog, Bot, Cloud, Thermometer, Signal, 
-  Package, Activity, Zap, TrendingUp, Info, Wifi, Clock
+  RefreshCw, Dog, Bot, Cloud, Activity, TrendingUp, Info, Eye, Zap, Clock
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { 
@@ -20,18 +19,19 @@ const ACTIVITY_DATA_TODAY = [
   { time: '20:00', rate: 40 }, { time: '22:00', rate: 10 },
 ];
 
+// Unchi Pose Distribution (Hourly counts)
+const UNCHI_POSE_DATA_TODAY = [
+  { time: '08:00', count: 1 }, { time: '10:00', count: 0 },
+  { time: '12:00', count: 2 }, { time: '14:00', count: 0 },
+  { time: '16:00', count: 0 }, { time: '18:00', count: 1 },
+  { time: '20:00', count: 0 }, { time: '22:00', count: 0 },
+];
+
 // Monthly Activity Trend (Daily for last 30 days - simplified)
 const ACTIVITY_DATA_MONTH = [
   { day: '3/1', rate: 65 }, { day: '3/5', rate: 70 },
   { day: '3/10', rate: 40 }, { day: '3/15', rate: 75 },
   { day: '3/19', rate: 60 },
-];
-
-// Robot Temperature (Last 30 mins)
-const ROBOT_TEMP_DATA = [
-  { time: '14:00', temp: 38 }, { time: '14:05', temp: 42 },
-  { time: '14:10', temp: 45 }, { time: '14:15', temp: 48 },
-  { time: '14:20', temp: 46 }, { time: '14:25', temp: 44 },
 ];
 
 export default function Dashboard() {
@@ -53,8 +53,8 @@ export default function Dashboard() {
       <section>
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-bold flex items-center gap-2">
-            <Signal className="w-4 h-4 text-blue-600" />
-            ライブモニタリング
+            <Eye className="w-4 h-4 text-blue-600" />
+            現在の様子
           </h2>
           <span className="text-[10px] text-slate-400 font-medium">最終更新: {lastUpdate}</span>
         </div>
@@ -64,9 +64,9 @@ export default function Dashboard() {
                 {[...Array(36)].map((_, i) => <div key={i} className="border border-white" />)}
              </div>
           </div>
-          <motion.div animate={{ x: [100, 120, 100], y: [80, 70, 80] }} transition={{ duration: 4, repeat: Infinity }} className="absolute border-2 border-green-500 rounded-lg p-1 bg-green-500/10" style={{ width: '80px', height: '100px' }}>
-            <span className="absolute -top-6 left-0 bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">ココちゃん 98%</span>
-          </motion.div>
+          <div className="absolute border-2 border-green-500 rounded-lg p-1 bg-green-500/10" style={{ width: '80px', height: '100px', left: '110px', top: '75px' }}>
+            <span className="absolute -top-6 left-0 bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">ココちゃん</span>
+          </div>
           {isRefreshing && <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] flex items-center justify-center"><RefreshCw className="w-8 h-8 text-blue-600 animate-spin" /></div>}
         </div>
         <button onClick={refreshImage} disabled={isRefreshing} className="w-full mt-3 bg-white border border-slate-200 text-slate-700 font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-sm">
@@ -129,7 +129,28 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Graph 2: Monthly Trend (NEW) */}
+        {/* Graph 2: Unchi Pose Trend (NEW) */}
+        <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+          <p className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">排泄予兆の発生傾向</p>
+          <h4 className="text-lg font-bold mb-6 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-orange-500" />
+            ウンチポーズの時間帯分布
+          </h4>
+          <div className="h-40 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={UNCHI_POSE_DATA_TODAY}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8'}} />
+                <YAxis hide allowDecimals={false} />
+                <Tooltip contentStyle={{borderRadius: '12px', border: 'none', fontSize: '10px'}} />
+                <Bar dataKey="count" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="text-[10px] text-slate-400 mt-4 text-center">※ AIが検知した排泄前の特徴的なポーズの回数です</p>
+        </div>
+
+        {/* Graph 3: Monthly Trend (NEW) */}
         <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
           <p className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">直近1ヶ月の活動率遷移</p>
           <h4 className="text-lg font-bold mb-6">長期健康トレンド</h4>
@@ -151,40 +172,6 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </div>
           <p className="text-[10px] text-slate-400 mt-4 text-center">※ ココちゃんの「元気がない日」を早期発見します</p>
-        </div>
-
-        {/* Graph 3: Robot Temperature */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
-          <p className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">ルンバの温度遷移</p>
-          <h4 className="text-lg font-bold mb-6">システム負荷状況</h4>
-          <div className="h-40 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={ROBOT_TEMP_DATA}>
-                <defs>
-                  <linearGradient id="colorTemp" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8'}} />
-                <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
-                <Tooltip contentStyle={{borderRadius: '12px', border: 'none', fontSize: '10px'}} />
-                <Area type="monotone" dataKey="temp" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorTemp)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. System Metrics Footer (Expanded to 5 items) */}
-      <section>
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 ml-1">システムステータス詳細</h3>
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm grid grid-cols-5 gap-1">
-          <MetricItem icon={<Package className="w-4 h-4" />} label="残弾" value={`${domeCount}基`} />
-          <MetricItem icon={<Thermometer className="w-4 h-4" />} label="CPU" value={`${cpuTemp}℃`} />
-          <MetricItem icon={<Signal className="w-4 h-4" />} label="推論" value="10.2fps" />
-          <MetricItem icon={<Wifi className="w-4 h-4" />} label="Wi-Fi" value="92%" />
-          <MetricItem icon={<Clock className="w-4 h-4" />} label="稼働" value="12d" />
         </div>
       </section>
     </div>
@@ -212,16 +199,6 @@ function MetricCard({ icon, label, value, trend }: { icon: any, label: string, v
         <span className="text-sm font-black text-slate-800">{value}</span>
         <span className={`text-[8px] font-black ${isPositive ? "text-green-500" : trend === 'Avg' ? "text-slate-400" : "text-blue-500"}`}>{trend}</span>
       </div>
-    </div>
-  );
-}
-
-function MetricItem({ icon, label, value }: { icon: any, label: string, value: string }) {
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <div className="text-slate-400">{icon}</div>
-      <div className="text-[8px] text-slate-400 font-bold leading-none text-center">{label}</div>
-      <div className="text-[10px] font-bold text-slate-800 text-center">{value}</div>
     </div>
   );
 }
