@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useCocobaStore } from "@/store/useCocobaStore";
 import { 
-  RefreshCw, Dog, Bot, Cloud, Activity, TrendingUp, Info, Eye, Zap, Clock
+  RefreshCw, Dog, Bot, Cloud, Activity, Info, Eye, Zap, Clock, History
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { 
@@ -65,7 +65,7 @@ export default function Dashboard() {
              </div>
           </div>
           <div className="absolute border-2 border-green-500 rounded-lg p-1 bg-green-500/10" style={{ width: '80px', height: '100px', left: '110px', top: '75px' }}>
-            <span className="absolute -top-6 left-0 bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">ココちゃん</span>
+            <span className="absolute -top-6 left-0 bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">ここちゃん</span>
           </div>
           {isRefreshing && <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] flex items-center justify-center"><RefreshCw className="w-8 h-8 text-blue-600 animate-spin" /></div>}
         </div>
@@ -76,7 +76,7 @@ export default function Dashboard() {
 
       {/* 2. Status Tiles */}
       <section className="grid grid-cols-2 gap-3">
-        <StatusTile icon={<Dog className="w-5 h-5" />} label="ココちゃんの状態" value={systemState === 'IDLE' ? "寝ています" : "活動中"} color="bg-orange-50 text-orange-600" subValue="室温: 24℃" />
+        <StatusTile icon={<Dog className="w-5 h-5" />} label="ここちゃんの状態" value={systemState === 'IDLE' ? "寝ています" : "活動中"} color="bg-orange-50 text-orange-600" subValue="室温: 24℃" />
         <StatusTile icon={<Bot className="w-5 h-5" />} label="ルンバの状態" value={systemState === 'IDLE' ? "待機中" : systemState} color="bg-blue-50 text-blue-600" subValue="バッテリー: 85%" />
       </section>
 
@@ -84,9 +84,9 @@ export default function Dashboard() {
       <section>
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 ml-1">詳細メトリクス</h3>
         <div className="grid grid-cols-3 gap-3">
-          <MetricCard icon={<Activity className="w-4 h-4" />} label="ココ活動率" value="42%" trend="+5%" />
+          <MetricCard icon={<Activity className="w-4 h-4" />} label="ここちゃん活動率" value="42%" trend="+5%" />
           <MetricCard icon={<Zap className="w-4 h-4" />} label="ルンバ温度" value="38.5℃" trend="-1.2℃" />
-          <MetricCard icon={<TrendingUp className="w-4 h-4" />} label="本日の歩数" value="1.2k" trend="Avg" />
+          <MetricCard icon={<History className="w-4 h-4" />} label="ウンチの回数" value="2回" trend="±0" />
         </div>
       </section>
 
@@ -134,7 +134,7 @@ export default function Dashboard() {
           <p className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">排泄予兆の発生傾向</p>
           <h4 className="text-lg font-bold mb-6 flex items-center gap-2">
             <Clock className="w-5 h-5 text-orange-500" />
-            ウンチポーズの時間帯分布
+            うんちの時間帯分布
           </h4>
           <div className="h-40 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -147,7 +147,7 @@ export default function Dashboard() {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <p className="text-[10px] text-slate-400 mt-4 text-center">※ AIが検知した排泄前の特徴的なポーズの回数です</p>
+          <p className="text-[10px] text-slate-400 mt-4 text-center">※ AIが検知したうんちの回数です</p>
         </div>
 
         {/* Graph 3: Monthly Trend (NEW) */}
@@ -171,7 +171,7 @@ export default function Dashboard() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
-          <p className="text-[10px] text-slate-400 mt-4 text-center">※ ココちゃんの「元気がない日」を早期発見します</p>
+          <p className="text-[10px] text-slate-400 mt-4 text-center">※ ここちゃんの「元気がない日」を早期発見します</p>
         </div>
       </section>
     </div>
