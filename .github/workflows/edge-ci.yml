@@ -1,0 +1,46 @@
+name: エッジ CI
+
+on:
+  push:
+    branches: [ main, dev ]
+    paths:
+      - 'src/edge/**'
+  pull_request:
+    branches: [ main, dev ]
+    paths:
+      - 'src/edge/**'
+
+jobs:
+  lint-and-test:
+    name: 静的解析とテスト
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: チェックアウト
+      uses: actions/checkout@v4
+
+    - name: Python のセットアップ
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: 依存関係のインストール
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        # src/edge/requirements.txt が存在する場合のみインストール
+        if [ -f src/edge/requirements.txt ]; then pip install -r src/edge/requirements.txt; fi
+
+    - name: リンターの実行 (flake8)
+      run: |
+        # 文法エラーや未定義名がある場合はビルドを停止
+        flake8 src/edge --count --select=E9,F63,F7,F82 --show-source --statistics
+        # 警告を無視して統計を表示
+        flake8 src/edge --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: テストの実行 (pytest)
+      run: |
+        # テストディレクトリまたはファイルが存在する場合のみ実行
+        if [ -d src/edge/tests ] || ls src/edge/**/test_*.py >/dev/null 2>&1; then
+          pytest src/edge
+        fi

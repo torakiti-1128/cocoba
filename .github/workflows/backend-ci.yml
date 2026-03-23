@@ -1,0 +1,42 @@
+name: バックエンド CI
+
+on:
+  push:
+    branches: [ main, dev ]
+    paths:
+      - 'src/functions/**'
+      - 'infrastructure/aws/**'
+  pull_request:
+    branches: [ main, dev ]
+    paths:
+      - 'src/functions/**'
+      - 'infrastructure/aws/**'
+
+jobs:
+  test-and-lint:
+    name: ビルドとテスト
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: チェックアウト
+      uses: actions/checkout@v4
+
+    - name: Python のセットアップ
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: AWS SAM CLI のセットアップ
+      uses: aws-actions/setup-sam@v2
+
+    - name: SAM ビルド
+      run: |
+        cd infrastructure/aws
+        sam build
+
+    # 将来的にテストやリンターの設定を追加
+    # - name: リンター用の依存関係インストール
+    #   run: |
+    #     pip install flake8
+    # - name: リンター実行
+    #   run: flake8 src/functions
