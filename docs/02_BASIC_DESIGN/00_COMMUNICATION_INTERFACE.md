@@ -58,7 +58,13 @@
     "dome_remaining": 4,
     "cpu_temp": 52.5,
     "robot_temp": 38.5,
-    "fps": 10.2
+    "fps": 10.2,
+    "wifi_signal": -45,      // dBm
+    "wifi_bandwidth": 150,   // Mbps
+    "rtt_ms": 12,            // 通信遅延
+    "storage_usage": 15,     // %
+    "uptime_seconds": 86400, // エッジPC稼働時間
+    "cpu_usage": 25          // %
   }
 }
 ```
@@ -85,9 +91,13 @@
 ```
 
 ### 4.3. CommandSet (操作コマンド)
-*   **緊急停止:** `KILL` (全停止)
+*   **緊急停止:** `KILL` (全停止: ルンバ, シールド, シューター, AI, カメラ)
 *   **個別停止:** `STOP_ROBOT`, `STOP_SHIELD`, `STOP_SHOOTER`, `STOP_INF`, `STOP_CAM`
-*   **メンテナンス:** `RESTART_INF`, `RESET_ESP`, `UPDATE_MODEL`, `PING`
+*   **同期・取得:** `SYNC_IMAGE` (最新画像取得ボタン用)
+*   **メンテナンス:** 
+    *   `RESTART_INF` (AI再起動), `RESET_ESP` (マイコンリセット)
+    *   `UPDATE_MODEL` (AIモデル更新), `TEST_COMM` (通信テスト)
+    *   `DIAG_STORAGE` (ストレージ診断), `PING` (疎通確認)
 
 ### 4.4. HealthPayload (死活監視)
 ```json

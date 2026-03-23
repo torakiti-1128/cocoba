@@ -17,6 +17,7 @@
 | `schedule` | Map | 稼働日・開始/終了時刻 | `{"mode": "weekdays", "start": "09:00"}` |
 | `safety` | Map | 温度しきい値・移動速度 | `{"cpu_limit": 75, "speed": "standard"}` |
 | `notifications` | Map | LINE通知の各ON/OFF | `{"on_poop": true, "on_pose": true}` |
+| `shooter` | Map | おやつ排出設定 | `{"amount": 1, "interval": 60}` |
 | `inference` | Map | 信頼度しきい値等 | `{"conf": 0.75, "fps": 10}` |
 | `updated_at` | Number | 最終更新タイムスタンプ | `1710892800` |
 
@@ -27,7 +28,8 @@
 
 | 属性名 | 型 | 説明 | 例 |
 | :--- | :--- | :--- | :--- |
-| `type` | String | ログ種別 (POOP, SAFETY等) | `SAFETY` |
+| `type` | String | POOP, SNACK, SAFETY, SYSTEM, MAINT | `MAINT` |
+| `sub_type` | String | MODEL_UPDATE, DIAG, REBOOT等 | `MODEL_UPDATE` |
 | `title` | String | ログのタイトル | `近接警告: 自動停止` |
 | `detail` | String | 詳細な説明文 | `0.5m以内に接近したため...` |
 | `has_image` | Boolean | 画像の有無 | `true` |
