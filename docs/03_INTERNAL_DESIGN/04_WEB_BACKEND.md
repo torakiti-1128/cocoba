@@ -44,3 +44,18 @@ DynamoDBはNoSQLであるため、Web UI が必要とする画面表示に合わ
     1.  IoT Core からエラーペイロードを受信。
     2.  Systems Manager Parameter Store から LINE Channel Access Token を取得。
     3.  LINE Messaging API を叩き、ユーザーへ警告メッセージを送信。
+
+## 5. 統計集計と外部連携ロジック
+
+### 5.1. 昨日比・トレンド集計
+*   **計算タイミング:** 毎日 00:00 (JST) に Lambda (EventBridgeトリガー) が実行。
+*   **処理:**
+    1.  前日分の `ActivityLogs` から「ウンチ回数」「稼働時間」をカウント。
+    2.  `Statistics` テーブルから前々日の値を読み込み、差分（プラスマイナス）を算出。
+    3.  当日の `initial_stats` として保存。WebUI はこれを `GET /stats` で取得して表示する。
+
+### 5.2. 天気・気温の取得
+*   **外部サービス:** OpenWeatherMap API を使用。
+*   **キャッシュ戦略:** 
+    *   30分に1回、Lambda が現在の天気と気温を取得し、DynamoDB の `SystemConfig` (または専用の `WeatherCache` テーブル) に保存。
+    *   WebUI は Lambda を直接叩かず、DynamoDB からキャッシュされた天気を取得することで、API制限の回避と低レイテンシを実現する。
