@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # MQTTブローカー (既存)
   mosquitto:
     build:
       context: ./mosquitto
@@ -13,14 +14,19 @@ services:
       - mosquitto_log:/mosquitto/log
     restart: always
 
-  # エッジPCのロジック
-  # edge-logic:
-  #   build:
-  #     context: ../../src/edge
-  #   container_name: cocoba-edge-logic
-  #   depends_on:
-  #     - mosquitto
-  #   restart: always
+  # S3/DynamoDBのエミュレータ (追加)
+  localstack:
+    container_name: cocoba-localstack
+    image: localstack/localstack
+    ports:
+      - "127.0.0.1:4566:4566"            # LocalStack の統合エンドポイント
+      - "127.0.0.1:4510-4559:4510-4559"  # 外部サービス用ポート
+    environment:
+      - SERVICES=s3,dynamodb            # 使うサービスを指定
+      - DEBUG=1
+    volumes:
+      - "./localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
 
 volumes:
   mosquitto_data:
