@@ -16,6 +16,8 @@
 本プロジェクトではハードウェアの安全（火災防止、犬への危害防止）がすべてに優先する。以下の規約を必ず読み込み、脳内に刻み込むこと。
 * `docs/05_DEVELOPMENT_RULES/03_HARDWARE_SAFETY.md` (物理的な安全規約)
 * `docs/05_DEVELOPMENT_RULES/04_AI_DRIVEN_PROTOCOL.md` (AIの絶対プロトコル)
+* `docs/05_DEVELOPMENT_RULES/06_ENVIRONMENT_SETUP.md` (環境構築手順)
+* `docs/05_DEVELOPMENT_RULES/07_LOCAL_DEV_GUIDE.md` (ローカル開発ガイド)
 
 ### 3. 直近の記憶（進捗ログ）の復元
 前回のセッションからどこまで進んだかを把握するため、以下のログを読み込むこと。
@@ -31,8 +33,6 @@
 # 現在のブランチと未コミットの変更を確認
 git status
 git branch
-
-# 存在するIssue（未解決タスク）の把握（もしCLIツールが使えない場合はディレクトリ内のTODOや該当ファイルを検索すること）
 ```
 
 ### 6. 起動完了報告の出力
@@ -45,3 +45,24 @@ git branch
 * **直近の進捗:** [ログから読み取ったサマリー]
 * **提案する次のアクション (Next Issue):** [次に取り組むべきIssue番号と、その実装方針]
 ---
+
+## 開発用コマンド
+
+### セットアップ
+- **一括:** `./scripts/setup/full_setup.sh`
+- **個別:** `./scripts/setup/{training,backend,edge,firmware,frontend}.sh`
+
+### ローカル検証
+- **インフラ起動:** `cd infrastructure/docker && docker-compose up -d`
+- **AWS初期化:** `./scripts/dev/init_local_aws.sh`
+- **API検証:** `cd infrastructure/aws && sam local start-api`
+
+### テスト・ビルド
+- **全体点検:** `./scripts/dev/check_all.sh`
+- **ファームウェア:** `cd src/firmware && pio run`
+- **フロントエンド:** `cd src/frontend && npm run lint && npm run build`
+
+## 開発ルール
+- **仮想環境:** Python仮想環境は各 `src/xxx/.venv` に配置されている。
+- **コミット規約:** `00_VERSION_CONTROL.md` に従い、プレフィックスを付ける。
+- **安全第一:** `03_HARDWARE_SAFETY.md` を常に意識し、モーター制御などの危険な操作には慎重に対応する。

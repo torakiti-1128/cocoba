@@ -28,6 +28,39 @@ Cocobaは、AIによる排泄検知、おやつによるここちゃんの誘導
 
 ---
 
+## 開発クイックスタート
+
+### 1. 必須ツールの準備
+以下のツールがインストールされていることを確認してください：
+- Node.js (v20+), Python (3.11+), Docker, AWS SAM CLI, PlatformIO
+
+### 2. 環境構築
+リポジトリをクローンした後、以下を実行して全コンポーネントをセットアップします：
+```bash
+./scripts/setup/full_setup.sh
+```
+※ 個別にセットアップしたい場合は `scripts/setup/` 配下の各スクリプト（`frontend.sh`, `edge.sh` 等）を実行してください。各ディレクトリの `.venv` に仮想環境が作成されます。
+
+### 3. ローカル開発環境の起動
+通信ブローカー(MQTT)とクラウドエミュレータ(LocalStack)を起動します：
+```bash
+cd infrastructure/docker
+docker-compose up -d
+./scripts/dev/init_local_aws.sh  # 初回のみ：S3/DynamoDBの初期化
+```
+
+詳細な手順は [docs/05_DEVELOPMENT_RULES/06_ENVIRONMENT_SETUP.md](docs/05_DEVELOPMENT_RULES/06_ENVIRONMENT_SETUP.md) を参照してください。
+
+---
+
+## 開発ガイド・規約
+- **バージョン管理・PR規約:** [00_VERSION_CONTROL.md](docs/05_DEVELOPMENT_RULES/00_VERSION_CONTROL.md)
+- **ハードウェア安全規約:** [03_HARDWARE_SAFETY.md](docs/05_DEVELOPMENT_RULES/03_HARDWARE_SAFETY.md)
+- **環境構築詳細:** [06_ENVIRONMENT_SETUP.md](docs/05_DEVELOPMENT_RULES/06_ENVIRONMENT_SETUP.md)
+- **ローカル検証方法:** [07_LOCAL_DEV_GUIDE.md](docs/05_DEVELOPMENT_RULES/07_LOCAL_DEV_GUIDE.md)
+
+---
+
 ## ビジュアルコンセプト（モックアップ）
 
 ### Cocoba ロボット本体
