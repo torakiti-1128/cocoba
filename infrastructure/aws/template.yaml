@@ -1,0 +1,122 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  cocoba-infrastructure
+  Cocoba用のAWSサーバーレスインフラ
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 128
+    Runtime: python3.11
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        DYNAMODB_TABLE: !Ref CocobaDataTable
+        S3_BUCKET: !Ref CocobaAssetBucket
+
+Resources:
+  # S3 バケット (画像・モデル保管用)
+  CocobaAssetBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub cocoba-assets-${AWS::AccountId}-${AWS::Region}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  # DynamoDB テーブル (状態・ログ管理用)
+  CocobaDataTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+  # API Gateway (エントリポイント)
+  CocobaApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt CocobaUserPool.Arn
+
+  # Cognito (認証・認可用)
+  CocobaUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: cocoba-user-pool
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      MfaConfiguration: 'OFF'
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+
+  CocobaUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: cocoba-web-client
+      UserPoolId: !Ref CocobaUserPool
+      GenerateSecret: false
+
+  # Lambda 関数
+  StatusSyncFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../../src/functions/status_sync/
+      Handler: app.handler
+      Events:
+        SyncApi:
+          Type: Api
+          Properties:
+            Path: /sync
+            Method: post
+            RestApiId: !Ref CocobaApi
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CocobaDataTable
+
+  PresignedUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../../src/functions/presigned_url/
+      Handler: app.handler
+      Events:
+        GetUrlApi:
+          Type: Api
+          Properties:
+            Path: /presigned-url
+            Method: get
+            RestApiId: !Ref CocobaApi
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref CocobaAssetBucket
+
+Outputs:
+  CocobaApiUrl:
+    Description: "API Gateway のエンドポイント URL"
+    Value: !Sub "https://${CocobaApi}.execute-api.${AWS::Region}.amazonaws.com/prod/"
+  CocobaAssetBucketName:
+    Description: "アセット保管用 S3 バケット名"
+    Value: !Ref CocobaAssetBucket
+  CocobaUserPoolId:
+    Description: "Cognito ユーザープール ID"
+    Value: !Ref CocobaUserPool
+  CocobaUserPoolClientId:
+    Description: "Cognito アプリクライアント ID"
+    Value: !Ref CocobaUserPoolClient

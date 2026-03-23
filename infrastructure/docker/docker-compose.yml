@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  mosquitto:
+    build:
+      context: ./mosquitto
+    container_name: cocoba-local-broker
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+    restart: always
+
+  # エッジPCのロジック
+  # edge-logic:
+  #   build:
+  #     context: ../../src/edge
+  #   container_name: cocoba-edge-logic
+  #   depends_on:
+  #     - mosquitto
+  #   restart: always
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:
